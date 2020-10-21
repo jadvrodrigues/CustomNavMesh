@@ -5,11 +5,11 @@ using UnityEngine;
 public class CustomNavMeshSurfaceInspector : Editor
 {
     CustomNavMeshSurface surface;
-    SerializedProperty mesh;
-
     // cache to then unhide it; why manipulate the hide flags in the custom editor? having it on 
     // OnValidate won't work instantly when dragging the prefab to the scene, that's why
     MeshFilter meshFilter;
+
+    SerializedProperty mesh;
 
     private void OnEnable()
     {

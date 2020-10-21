@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using UnityEditor;
-using UnityEditor.Experimental.SceneManagement;
+﻿using UnityEditor;
 using UnityEngine;
 
 /// <summary>
