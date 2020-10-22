@@ -12,6 +12,8 @@ The new components are a replacement for the built-in ones. Here we introduce th
 
 Avoid mixing the original components with these in your project.
 
+Note: The system expects the navigation surfaces to be rendered meshes and not Physics Colliders or Terrains.
+
 # Settings
 
 All the new components secretly spawn an hidden duplicate version of themselves, where the agents on that hidden surface can be toggled between NavMeshAgent and NavMeshObstacle. This allows the agents that are shown to avoid each other, using the hidden ones pathing to move.

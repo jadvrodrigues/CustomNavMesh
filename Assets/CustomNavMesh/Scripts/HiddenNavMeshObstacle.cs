@@ -1,18 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class HiddenNavMeshObstacle : MonoBehaviour
+/// <summary>
+/// An obstacle for HiddenNavMeshAgents to avoid.
+/// </summary>
+[DisallowMultipleComponent, AddComponentMenu("")] // remove from Add Component list
+public class HiddenNavMeshObstacle : CustomMonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

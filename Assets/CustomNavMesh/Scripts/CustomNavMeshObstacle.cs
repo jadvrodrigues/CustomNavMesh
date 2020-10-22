@@ -125,8 +125,41 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
                 {
                     navMeshObstacle = gameObject.AddComponent<NavMeshObstacle>();
                 }
+                else
+                {
+                    // update existing nav mesh obstacle
+                    CopyValues(this, navMeshObstacle);
+                }
             }
             return navMeshObstacle;
         }
+    }
+
+    protected override void OnCustomEnable()
+    {
+        // calling the NavMeshObstacle property will add an obstacle if gameObject doesn't have it
+        // the custom inspector will only hide after a split second so update the flags now; 
+        NavMeshObstacle.hideFlags = HideFlags.HideInInspector;
+        NavMeshObstacle.enabled = true;
+    }
+
+    protected override void OnCustomDisable()
+    {
+        if(NavMeshObstacle != null)
+        {
+            NavMeshObstacle.enabled = false;
+        }
+    }
+
+    void CopyValues(CustomNavMeshObstacle sourceObs, NavMeshObstacle destObs)
+    {
+        // only assigning the properties that are different would yield no performance benefits
+        destObs.carveOnlyStationary = sourceObs.m_CarveOnlyStationary;
+        destObs.carving = sourceObs.m_Carve;
+        destObs.carvingMoveThreshold = sourceObs.m_MoveThreshold;
+        destObs.carvingTimeToStationary = sourceObs.m_TimeToStationary;
+        destObs.center = sourceObs.m_Center;
+        destObs.shape = sourceObs.m_Shape;
+        destObs.size = sourceObs.m_Size;
     }
 }

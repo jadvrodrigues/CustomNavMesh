@@ -125,10 +125,9 @@ public class CustomNavMeshSurface : CustomMonoBehaviour
 
     protected override void OnCustomEnable()
     {
-        var meshRenderer = GetComponent<MeshRenderer>();
-        if (meshRenderer == null)
+        if (GetComponent<MeshRenderer>() == null)
         {
-            meshRenderer = gameObject.AddComponent<MeshRenderer>();
+            gameObject.AddComponent<MeshRenderer>();
         }
 
         TryCreatingHiddenSurface();
