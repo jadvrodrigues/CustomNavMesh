@@ -138,11 +138,6 @@ public class CustomNavMeshSurface : CustomMonoBehaviour
         TryDisablingHiddenSurface();
     }
 
-    protected override void OnCustomDestroy()
-    {
-        if (MeshFilter != null) MeshFilter.hideFlags = HideFlags.None;
-    }
-
     void TryCreatingHiddenSurface()
     {
         if (HiddenSurface == null)

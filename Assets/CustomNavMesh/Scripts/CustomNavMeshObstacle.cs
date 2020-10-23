@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
@@ -113,6 +114,23 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
         set { NavMeshObstacle.velocity = value; }
     }
 
+    HiddenNavMeshObstacle hiddenObstacle;
+    HiddenNavMeshObstacle HiddenObstacle
+    {
+        get
+        {
+            if (hiddenObstacle == null)
+            {
+                hiddenObstacle = transform.GetComponentInImmediateChildren<HiddenNavMeshObstacle>();
+            }
+            return hiddenObstacle;
+        }
+        set
+        {
+            hiddenObstacle = value;
+        }
+    }
+
     NavMeshObstacle navMeshObstacle;
     NavMeshObstacle NavMeshObstacle
     {
@@ -141,6 +159,8 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
         // the custom inspector will only hide after a split second so update the flags now; 
         NavMeshObstacle.hideFlags = HideFlags.HideInInspector;
         NavMeshObstacle.enabled = true;
+
+        TryCreatingHiddenObstacle();
     }
 
     protected override void OnCustomDisable()
@@ -149,6 +169,8 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
         {
             NavMeshObstacle.enabled = false;
         }
+
+        TryDisablingHiddenObstacle();
     }
 
     void CopyValues(CustomNavMeshObstacle sourceObs, NavMeshObstacle destObs)
@@ -161,5 +183,39 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
         destObs.center = sourceObs.m_Center;
         destObs.shape = sourceObs.m_Shape;
         destObs.size = sourceObs.m_Size;
+    }
+
+    void TryCreatingHiddenObstacle()
+    {
+        if (HiddenObstacle == null)
+        {
+            var hiddenObject = new GameObject("(Hidden) " + name);
+            hiddenObject.transform.parent = transform;
+            hiddenObject.hideFlags = HideFlags.NotEditable;
+
+#if UNITY_EDITOR
+            var staticFlags = GameObjectUtility.GetStaticEditorFlags(gameObject);
+            GameObjectUtility.SetStaticEditorFlags(hiddenObject, staticFlags);
+#else
+        hiddenObject.isStatic = gameObject.isStatic;
+#endif
+
+            HiddenObstacle = hiddenObject.AddComponent<HiddenNavMeshObstacle>();
+        }
+        else
+        {
+            HiddenObstacle.gameObject.name = "(Hidden) " + name;
+            HiddenObstacle.gameObject.SetActive(true);
+            HiddenObstacle.gameObject.hideFlags = HideFlags.NotEditable; // reapply hide flags after activating it
+        }
+    }
+
+    void TryDisablingHiddenObstacle()
+    {
+        if (HiddenObstacle != null)
+        {
+            HiddenObstacle.gameObject.name = "(Unused) " + name;
+            HiddenObstacle.gameObject.SetActive(false);
+        }
     }
 }
