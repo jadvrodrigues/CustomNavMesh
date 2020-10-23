@@ -66,6 +66,7 @@ public class CustomNavMeshObstacleInspector : Editor
             }
 
             serializedObject.Update();
+            serializedObject.ApplyModifiedProperties();
         }
 
         EditorGUI.BeginChangeCheck();
@@ -76,6 +77,8 @@ public class CustomNavMeshObstacleInspector : Editor
             Undo.RecordObject(navMeshObstacle, "");
 
             obstacle.Center = m_Center.vector3Value;
+
+            serializedObject.ApplyModifiedProperties();
         }
 
         if (m_Shape.enumValueIndex == 0)
@@ -89,6 +92,8 @@ public class CustomNavMeshObstacleInspector : Editor
                 Undo.RecordObject(navMeshObstacle, "");
 
                 obstacle.Size = new Vector3(radius * 2.0f, height, radius * 2.0f);
+
+                serializedObject.ApplyModifiedProperties();
             }
         }
         else if (m_Shape.enumValueIndex == 1)
@@ -102,6 +107,8 @@ public class CustomNavMeshObstacleInspector : Editor
                 Undo.RecordObject(navMeshObstacle, "");
 
                 obstacle.Size = size;
+
+                serializedObject.ApplyModifiedProperties();
             }
         }
 
@@ -113,6 +120,8 @@ public class CustomNavMeshObstacleInspector : Editor
             Undo.RecordObject(navMeshObstacle, "");
 
             obstacle.Carving = m_Carve.boolValue;
+
+            serializedObject.ApplyModifiedProperties();
         }
 
         if (m_Carve.boolValue)
@@ -127,6 +136,8 @@ public class CustomNavMeshObstacleInspector : Editor
                 Undo.RecordObject(navMeshObstacle, "");
 
                 obstacle.CarvingMoveThreshold = m_MoveThreshold.floatValue;
+
+                serializedObject.ApplyModifiedProperties();
             }
 
 
@@ -138,6 +149,8 @@ public class CustomNavMeshObstacleInspector : Editor
                 Undo.RecordObject(navMeshObstacle, "");
 
                 obstacle.CarvingTimeToStationary = m_TimeToStationary.floatValue;
+
+                serializedObject.ApplyModifiedProperties();
             }
 
             EditorGUI.BeginChangeCheck();
@@ -148,11 +161,11 @@ public class CustomNavMeshObstacleInspector : Editor
                 Undo.RecordObject(navMeshObstacle, "");
 
                 obstacle.CarveOnlyStationary = m_CarveOnlyStationary.boolValue;
+
+                serializedObject.ApplyModifiedProperties();
             }
 
             EditorGUI.indentLevel--;
         }
-
-        serializedObject.ApplyModifiedProperties();
     }
 }

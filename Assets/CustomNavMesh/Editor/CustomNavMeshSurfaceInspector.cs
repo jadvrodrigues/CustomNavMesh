@@ -48,8 +48,8 @@ public class CustomNavMeshSurfaceInspector : Editor
             if(meshFilter != null) Undo.RecordObject(meshFilter, "");
 
             surface.Mesh = (Mesh) mesh.objectReferenceValue;
-        }
 
-        serializedObject.ApplyModifiedProperties(); // needed to create a prefab override
+            serializedObject.ApplyModifiedProperties(); // needed to create a prefab override
+        }
     }
 }
