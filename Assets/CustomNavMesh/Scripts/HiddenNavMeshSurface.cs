@@ -36,6 +36,10 @@ public class HiddenNavMeshSurface : CustomMonoBehaviour
                 DestroyImmediate(this);
                 return;
             }
+            else if(!CustomSurface.enabled)
+            {
+                gameObject.SetActive(false);
+            }
         }
         else
         {
