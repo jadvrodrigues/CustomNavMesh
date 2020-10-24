@@ -153,6 +153,17 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
         }
     }
 
+#if UNITY_EDITOR
+    // only method called as a prefab in the Assets folder (except OnCustomDestroy)
+    private void OnValidate()
+    {
+        if (onPrefabAssetRemoveComponent == null)
+        {
+            onPrefabAssetRemoveComponent = TryDestroyHiddenObstacleChild;
+        }
+    }
+#endif
+
     protected override void OnCustomEnable()
     {
         // calling the NavMeshObstacle property will add an obstacle if gameObject doesn't have it
@@ -172,6 +183,19 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
 
         TryDisablingHiddenObstacle();
     }
+
+#if UNITY_EDITOR
+    protected override void OnRemoveComponent()
+    {
+        if (!PrefabUtility.IsPartOfAnyPrefab(this))
+        {
+            if (HiddenObstacle != null)
+            {
+                DestroyImmediate(HiddenObstacle.gameObject);
+            }
+        }
+    }
+#endif
 
     void CopyValues(CustomNavMeshObstacle sourceObs, NavMeshObstacle destObs)
     {
@@ -216,6 +240,15 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
         {
             HiddenObstacle.gameObject.name = "(Unused) " + name;
             HiddenObstacle.gameObject.SetActive(false);
+        }
+    }
+
+    static void TryDestroyHiddenObstacleChild(GameObject root)
+    {
+        var hiddenObstacle = root.transform.GetComponentInImmediateChildren<HiddenNavMeshObstacle>();
+        if (hiddenObstacle != null)
+        {
+            DestroyImmediate(hiddenObstacle.gameObject);
         }
     }
 }

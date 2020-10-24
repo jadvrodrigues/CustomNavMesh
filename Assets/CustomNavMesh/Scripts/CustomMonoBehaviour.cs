@@ -48,6 +48,11 @@ public class CustomMonoBehaviour : MonoBehaviour
     protected virtual void OnCustomDestroy() { }
 
     /// <summary>
+    /// Called when "Remove Component" option is clicked on. Triggered before destruction.
+    /// </summary>
+    protected virtual void OnRemoveComponent() { }
+
+    /// <summary>
     /// Called when Awake is called in play mode.
     /// </summary>
     protected virtual void OnCustomAwake() { }
@@ -124,6 +129,7 @@ public class CustomMonoBehaviour : MonoBehaviour
     static void RemoveComponent(MenuCommand command)
     {
         CustomMonoBehaviour target = (CustomMonoBehaviour)command.context;
+        target.OnRemoveComponent();
 
         if (PrefabUtility.IsPartOfPrefabAsset(target))
         {
@@ -134,14 +140,14 @@ public class CustomMonoBehaviour : MonoBehaviour
 
             // note that in the prefab asset inspector, you can only inspect the root gameObject, so the 
             // removed component must be a part of it; automatically picks the right CustomMonoBehaviour
-            DestroyImmediate(root.GetComponent<CustomMonoBehaviour>()); 
+            DestroyImmediate(root.GetComponent<CustomMonoBehaviour>());
 
             PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
             PrefabUtility.UnloadPrefabContents(root);
         }
         else
         {
-            DestroyImmediate(target);
+            Undo.DestroyObjectImmediate(target);
         }
     }
 #endif

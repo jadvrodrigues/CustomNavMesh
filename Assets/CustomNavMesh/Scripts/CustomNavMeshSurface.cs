@@ -78,9 +78,15 @@ public class CustomNavMeshSurface : CustomMonoBehaviour
         }
     }
 
-    // only method called as a prefab in the Assets folder
+#if UNITY_EDITOR
+    // only method called as a prefab in the Assets folder (except OnCustomDestroy)
     private void OnValidate()
     {
+        if(onPrefabAssetRemoveComponent == null)
+        {
+            onPrefabAssetRemoveComponent = TryDestroyHiddenSurfaceChild;
+        }
+
         if (PrefabUtility.IsPartOfPrefabAsset(this))
         {
             var filter = GetComponent<MeshFilter>();
@@ -122,6 +128,7 @@ public class CustomNavMeshSurface : CustomMonoBehaviour
             }
         }
     }
+#endif
 
     protected override void OnCustomEnable()
     {
@@ -137,6 +144,24 @@ public class CustomNavMeshSurface : CustomMonoBehaviour
     {
         TryDisablingHiddenSurface();
     }
+
+    protected override void OnCustomDestroy()
+    {
+        MeshFilter.hideFlags = HideFlags.None;
+    }
+
+#if UNITY_EDITOR
+    protected override void OnRemoveComponent()
+    {
+        if (!PrefabUtility.IsPartOfAnyPrefab(this))
+        {
+            if (HiddenSurface != null)
+            {
+                DestroyImmediate(HiddenSurface.gameObject);
+            }
+        }
+    }
+#endif
 
     void TryCreatingHiddenSurface()
     {
@@ -171,6 +196,15 @@ public class CustomNavMeshSurface : CustomMonoBehaviour
         {
             HiddenSurface.gameObject.name = "(Unused) " + name;
             HiddenSurface.gameObject.SetActive(false);
+        }
+    }
+
+    static void TryDestroyHiddenSurfaceChild(GameObject root)
+    {
+        var hiddenSurface = root.transform.GetComponentInImmediateChildren<HiddenNavMeshSurface>();
+        if(hiddenSurface != null)
+        {
+            DestroyImmediate(hiddenSurface.gameObject);
         }
     }
 }
