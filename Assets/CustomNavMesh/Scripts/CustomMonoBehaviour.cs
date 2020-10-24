@@ -1,6 +1,5 @@
-﻿using UnityEditor;
-using UnityEditor.Experimental.SceneManagement;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEditor;
 
 /// <summary>
 /// Monobehaviour replacement class used to simplify some UnityMessages and 
@@ -11,6 +10,19 @@ using UnityEngine;
 [ExecuteAlways]
 public class CustomMonoBehaviour : MonoBehaviour
 {
+    /// <summary>
+    /// A delegate which can be used to register callback methods to be invoked before 
+    /// this component gets destroyed when "Remove Component" is clicked in the prefab 
+    /// asset inspector.
+    /// </summary>
+    protected delegate void OnPrefabAssetRemoveComponent(GameObject root);
+
+    /// <summary>
+    /// Set a function to be called before this component gets destroyed when "Remove 
+    /// Component" is clicked in the prefab asset inspector.
+    /// </summary>
+    protected OnPrefabAssetRemoveComponent onPrefabAssetRemoveComponent;
+
     /// <summary>
     /// Called from editor and play mode when component is added, becomes enabled, is 
     /// instantiated, upon entering Play and prefab mode, on script reload and moving 
@@ -30,7 +42,8 @@ public class CustomMonoBehaviour : MonoBehaviour
 
     /// <summary>
     /// Called from editor and play mode when component/owner gameObject is destroyed.
-    /// Only called if game object is active and in the scene.
+    /// Called if game object is active and in the scene. Note that it is also called 
+    /// in the "Remove Component" option in the inspector of a prefab asset.
     /// </summary>
     protected virtual void OnCustomDestroy() { }
 
@@ -105,6 +118,32 @@ public class CustomMonoBehaviour : MonoBehaviour
 
     [MenuItem("CONTEXT/CustomMonoBehaviour/Reset", true)]
     static bool ValidateReplacedReset() { return false; } // disable reset
+
+    // replace reset option, so that OnCustomDestroy also gets called in the prefab asset inspector
+    [MenuItem("CONTEXT/CustomMonoBehaviour/Remove Component")]
+    static void RemoveComponent(MenuCommand command)
+    {
+        CustomMonoBehaviour target = (CustomMonoBehaviour)command.context;
+
+        if (PrefabUtility.IsPartOfPrefabAsset(target))
+        {
+            var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(target);
+            var root = PrefabUtility.LoadPrefabContents(prefabPath);
+
+            target.onPrefabAssetRemoveComponent?.Invoke(root);
+
+            // note that in the prefab asset inspector, you can only inspect the root gameObject, so the 
+            // removed component must be a part of it; automatically picks the right CustomMonoBehaviour
+            DestroyImmediate(root.GetComponent<CustomMonoBehaviour>()); 
+
+            PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+        else
+        {
+            DestroyImmediate(target);
+        }
+    }
 #endif
 
 }
