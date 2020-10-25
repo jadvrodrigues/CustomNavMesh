@@ -43,7 +43,23 @@ public static class PrimitiveMeshes
     /// <returns></returns>
     public static Mesh GetMesh(this PrimitiveType type)
     {
-        return Resources.Load<GameObject>("PrimitiveTypes/" + type.ToString()).GetComponent<MeshFilter>().sharedMesh;
+        switch(type)
+        {
+            case PrimitiveType.Sphere:
+                return Sphere;
+            case PrimitiveType.Capsule:
+                return Capsule;
+            case PrimitiveType.Cylinder:
+                return Cylinder;
+            case PrimitiveType.Cube:
+                return Cube;
+            case PrimitiveType.Plane:
+                return Plane;
+            case PrimitiveType.Quad:
+                return Quad;
+            default:
+                return null;
+        }
     }
 
     /// <summary>

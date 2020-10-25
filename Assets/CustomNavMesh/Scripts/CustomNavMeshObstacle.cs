@@ -147,11 +147,28 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
                 else
                 {
                     // update existing nav mesh obstacle
-                    CopyValues(this, navMeshObstacle);
+                    TransferObstacleValues(this, navMeshObstacle);
                 }
             }
             return navMeshObstacle;
         }
+    }
+
+    /// <summary>
+    /// Transfers the parameters of a CustomNavMeshObstacle to a NavMeshObstacle.
+    /// </summary>
+    /// <param name="sourceObs">The CustomNavMeshObstacle to copy</param>
+    /// <param name="destObs">The destination NavMeshObstacle</param>
+    public static void TransferObstacleValues(CustomNavMeshObstacle sourceObs, NavMeshObstacle destObs)
+    {
+        // only assigning the properties that are different would yield no performance benefits
+        destObs.carveOnlyStationary = sourceObs.m_CarveOnlyStationary;
+        destObs.carving = sourceObs.m_Carve;
+        destObs.carvingMoveThreshold = sourceObs.m_MoveThreshold;
+        destObs.carvingTimeToStationary = sourceObs.m_TimeToStationary;
+        destObs.center = sourceObs.m_Center;
+        destObs.shape = sourceObs.m_Shape;
+        destObs.size = sourceObs.m_Size;
     }
 
 #if UNITY_EDITOR
@@ -187,7 +204,10 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
 
     protected override void OnCustomDestroy()
     {
-        DestroyImmediate(navMeshObstacle);
+        if(gameObject.activeInHierarchy) // used to avoid destroying it twice, when gameObject is destroyed
+        {
+            Undo.DestroyObjectImmediate(NavMeshObstacle);
+        }
 
 #if UNITY_EDITOR
         if (!PrefabUtility.IsPartOfAnyPrefab(this) || PrefabStageUtility.GetCurrentPrefabStage() != null)
@@ -198,18 +218,6 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
             }
         }
 #endif
-    }
-
-    void CopyValues(CustomNavMeshObstacle sourceObs, NavMeshObstacle destObs)
-    {
-        // only assigning the properties that are different would yield no performance benefits
-        destObs.carveOnlyStationary = sourceObs.m_CarveOnlyStationary;
-        destObs.carving = sourceObs.m_Carve;
-        destObs.carvingMoveThreshold = sourceObs.m_MoveThreshold;
-        destObs.carvingTimeToStationary = sourceObs.m_TimeToStationary;
-        destObs.center = sourceObs.m_Center;
-        destObs.shape = sourceObs.m_Shape;
-        destObs.size = sourceObs.m_Size;
     }
 
     void TryCreatingHiddenObstacle()
