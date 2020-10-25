@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEditor.Experimental.SceneManagement;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -184,18 +185,20 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
         TryDisablingHiddenObstacle();
     }
 
-#if UNITY_EDITOR
-    protected override void OnRemoveComponent()
+    protected override void OnCustomDestroy()
     {
-        if (!PrefabUtility.IsPartOfAnyPrefab(this))
+        DestroyImmediate(navMeshObstacle);
+
+#if UNITY_EDITOR
+        if (!PrefabUtility.IsPartOfAnyPrefab(this) || PrefabStageUtility.GetCurrentPrefabStage() != null)
         {
             if (HiddenObstacle != null)
             {
-                DestroyImmediate(HiddenObstacle.gameObject);
+                Undo.DestroyObjectImmediate(HiddenObstacle.gameObject);
             }
         }
-    }
 #endif
+    }
 
     void CopyValues(CustomNavMeshObstacle sourceObs, NavMeshObstacle destObs)
     {

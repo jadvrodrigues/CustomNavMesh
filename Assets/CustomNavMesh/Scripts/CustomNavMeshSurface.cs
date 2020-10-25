@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEditor.Experimental.SceneManagement;
 using UnityEngine;
 
 /// <summary>
@@ -148,20 +149,17 @@ public class CustomNavMeshSurface : CustomMonoBehaviour
     protected override void OnCustomDestroy()
     {
         MeshFilter.hideFlags = HideFlags.None;
-    }
 
 #if UNITY_EDITOR
-    protected override void OnRemoveComponent()
-    {
-        if (!PrefabUtility.IsPartOfAnyPrefab(this))
+        if (!PrefabUtility.IsPartOfAnyPrefab(this) || PrefabStageUtility.GetCurrentPrefabStage() != null)
         {
             if (HiddenSurface != null)
             {
-                DestroyImmediate(HiddenSurface.gameObject);
+                Undo.DestroyObjectImmediate(HiddenSurface.gameObject);
             }
         }
-    }
 #endif
+    }
 
     void TryCreatingHiddenSurface()
     {

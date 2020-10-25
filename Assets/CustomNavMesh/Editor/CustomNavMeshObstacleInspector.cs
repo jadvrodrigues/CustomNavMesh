@@ -35,14 +35,6 @@ public class CustomNavMeshObstacleInspector : Editor
         m_CarveOnlyStationary = serializedObject.FindProperty("m_CarveOnlyStationary");
     }
 
-    private void OnDisable()
-    {
-        if (target == null && navMeshObstacle != null) // if component/gameObject was destroyed
-        {
-            DestroyImmediate(navMeshObstacle);
-        }
-    }
-
     public override void OnInspectorGUI()
     {
         serializedObject.Update();

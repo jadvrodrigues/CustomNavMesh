@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using UnityEditor.Experimental.SceneManagement;
 
 /// <summary>
 /// Monobehaviour replacement class used to simplify some UnityMessages and 
@@ -48,11 +49,6 @@ public class CustomMonoBehaviour : MonoBehaviour
     protected virtual void OnCustomDestroy() { }
 
     /// <summary>
-    /// Called when "Remove Component" option is clicked on. Triggered before destruction.
-    /// </summary>
-    protected virtual void OnRemoveComponent() { }
-
-    /// <summary>
     /// Called when Awake is called in play mode.
     /// </summary>
     protected virtual void OnCustomAwake() { }
@@ -89,6 +85,9 @@ public class CustomMonoBehaviour : MonoBehaviour
     {
 #if UNITY_EDITOR
         if (Time.frameCount == 0) return;
+
+        // ignore when this is called for simply leaving the prefab mode
+        if (PrefabStageUtility.GetCurrentPrefabStage() != null && !gameObject.activeInHierarchy) return;
 #endif
         OnCustomDestroy();
     }
@@ -129,7 +128,6 @@ public class CustomMonoBehaviour : MonoBehaviour
     static void RemoveComponent(MenuCommand command)
     {
         CustomMonoBehaviour target = (CustomMonoBehaviour)command.context;
-        target.OnRemoveComponent();
 
         if (PrefabUtility.IsPartOfPrefabAsset(target))
         {
