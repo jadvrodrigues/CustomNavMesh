@@ -213,20 +213,20 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
 
     protected override void OnCustomDestroy()
     {
-        if(gameObject.activeInHierarchy) // used to avoid destroying it twice, when gameObject is destroyed
+        if (gameObject.activeInHierarchy) // used to avoid destroying things twice, when gameObject is destroyed
         {
             Undo.DestroyObjectImmediate(NavMeshObstacle);
-        }
 
 #if UNITY_EDITOR
-        if (!PrefabUtility.IsPartOfAnyPrefab(this) || PrefabStageUtility.GetCurrentPrefabStage() != null)
-        {
-            if (HiddenObstacle != null)
+            if (!PrefabUtility.IsPartOfAnyPrefab(this) || PrefabStageUtility.GetCurrentPrefabStage() != null)
             {
-                Undo.DestroyObjectImmediate(HiddenObstacle.gameObject);
+                if (HiddenObstacle != null)
+                {
+                    Undo.DestroyObjectImmediate(HiddenObstacle.gameObject);
+                }
             }
-        }
 #endif
+        }
     }
 
     void TryCreatingHiddenObstacle()

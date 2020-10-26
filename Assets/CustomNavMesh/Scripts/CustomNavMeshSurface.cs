@@ -150,15 +150,18 @@ public class CustomNavMeshSurface : CustomMonoBehaviour
     {
         MeshFilter.hideFlags = HideFlags.None;
 
-#if UNITY_EDITOR
-        if (!PrefabUtility.IsPartOfAnyPrefab(this) || PrefabStageUtility.GetCurrentPrefabStage() != null)
+        if (gameObject.activeInHierarchy) // used to avoid destroying things twice, when gameObject is destroyed
         {
-            if (HiddenSurface != null)
+#if UNITY_EDITOR
+            if (!PrefabUtility.IsPartOfAnyPrefab(this) || PrefabStageUtility.GetCurrentPrefabStage() != null)
             {
-                Undo.DestroyObjectImmediate(HiddenSurface.gameObject);
+                if (HiddenSurface != null)
+                {
+                    Undo.DestroyObjectImmediate(HiddenSurface.gameObject);
+                }
             }
-        }
 #endif
+        }
     }
 
     void TryCreatingHiddenSurface()
