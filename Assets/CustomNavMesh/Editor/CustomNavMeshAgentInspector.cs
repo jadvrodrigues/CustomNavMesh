@@ -41,7 +41,7 @@ public class CustomNavMeshAgentInspector : Editor
         if (navMeshAgent != null)
         {
             // prevent the user from changing the agent through the NavMeshAgent's inspector
-            // navMeshAgent.hideFlags = HideFlags.HideInInspector;
+            navMeshAgent.hideFlags = HideFlags.HideInInspector;
         }
 
         m_AgentTypeID = serializedObject.FindProperty("m_AgentTypeID");

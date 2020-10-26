@@ -235,7 +235,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     {
         // calling the NavMeshObstacle property will add an obstacle if gameObject doesn't have it
         // the custom inspector will only hide after a split second so update the flags now; 
-        // NavMeshAgent.hideFlags = HideFlags.HideInInspector;
+        NavMeshAgent.hideFlags = HideFlags.HideInInspector;
         NavMeshAgent.enabled = true;
     }
 
