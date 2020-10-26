@@ -18,6 +18,15 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
     /// </summary>
     public event OnChange onChange;
 
+    /// <summary>
+    /// A delegate which can be used to register callback methods to be invoked after the obstacle's size or shape is changed.
+    /// </summary>
+    public delegate void OnSizeChange();
+    /// <summary>
+    /// Subscribe a function to be called after the obstacle's size or shape is changed.
+    /// </summary>
+    public event OnSizeChange onSizeChange;
+
     [SerializeField] NavMeshObstacleShape m_Shape = NavMeshObstacleShape.Box;
     /// <summary>
     /// The shape of the obstacle.
@@ -25,7 +34,7 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
     public NavMeshObstacleShape Shape
     {
         get { return m_Shape; }
-        set { m_Shape = value; NavMeshObstacle.shape = value; onChange?.Invoke(); }
+        set { m_Shape = value; NavMeshObstacle.shape = value; onChange?.Invoke(); onSizeChange?.Invoke(); }
     }
 
     [SerializeField] Vector3 m_Center = Vector3.zero;
@@ -45,7 +54,7 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
     public Vector3 Size
     {
         get { return m_Size; }
-        set { m_Size = value; NavMeshObstacle.size = value; onChange?.Invoke(); }
+        set { m_Size = value; NavMeshObstacle.size = value; onChange?.Invoke(); onSizeChange?.Invoke(); }
     }
 
     [SerializeField] bool m_Carve = false;

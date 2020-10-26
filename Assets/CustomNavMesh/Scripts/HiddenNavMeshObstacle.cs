@@ -130,25 +130,28 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
             Undo.RecordObject(NavMeshObstacle, "");
 #endif
             CustomNavMeshObstacle.TransferObstacleValues(CustomObstacle, NavMeshObstacle);
+        }
+    }
 
-            var meshFilter = GetComponent<MeshFilter>();
-            if (meshFilter != null)
-            {
+    void UpdateMesh()
+    {
+        var meshFilter = GetComponent<MeshFilter>();
+        if (meshFilter != null)
+        {
 #if UNITY_EDITOR
-                Undo.RecordObject(meshFilter, "");
+            Undo.RecordObject(meshFilter, "");
 #endif
-                switch(NavMeshObstacle.shape)
-                {
-                    case NavMeshObstacleShape.Box:
-                        meshFilter.sharedMesh = PrimitiveType.Cube.CreateScaledMesh(NavMeshObstacle.size);
-                        break;
-                    case NavMeshObstacleShape.Capsule:
-                        float radius = NavMeshObstacle.radius;
-                        float height = NavMeshObstacle.height;
-                        Vector3 scale = new Vector3 (radius * 2f, height, radius * 2f);
-                        meshFilter.sharedMesh = PrimitiveType.Capsule.CreateScaledMesh(scale);
-                        break;
-                }
+            switch (NavMeshObstacle.shape)
+            {
+                case NavMeshObstacleShape.Box:
+                    meshFilter.sharedMesh = PrimitiveType.Cube.CreateScaledMesh(NavMeshObstacle.size);
+                    break;
+                case NavMeshObstacleShape.Capsule:
+                    float radius = NavMeshObstacle.radius;
+                    float height = NavMeshObstacle.height;
+                    Vector3 scale = new Vector3(radius * 2f, height, radius * 2f);
+                    meshFilter.sharedMesh = PrimitiveType.Capsule.CreateScaledMesh(scale);
+                    break;
             }
         }
     }
@@ -181,7 +184,11 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
     {
         if (!subscribed)
         {
-            if (CustomObstacle != null) CustomObstacle.onChange += UpdateObstacle;
+            if (CustomObstacle != null)
+            {
+                CustomObstacle.onChange += UpdateObstacle;
+                CustomObstacle.onSizeChange += UpdateMesh;
+            }
 
             CustomNavMesh.onRenderHiddenUpdate += UpdateVisibility;
             CustomNavMesh.onHiddenTranslationUpdate += UpdatePosition;
@@ -194,7 +201,11 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
     {
         if (subscribed)
         {
-            if (CustomObstacle != null) CustomObstacle.onChange -= UpdateObstacle;
+            if (CustomObstacle != null)
+            {
+                CustomObstacle.onChange -= UpdateObstacle;
+                CustomObstacle.onSizeChange -= UpdateMesh;
+            }
 
             CustomNavMesh.onRenderHiddenUpdate -= UpdateVisibility;
             CustomNavMesh.onHiddenTranslationUpdate -= UpdatePosition;
