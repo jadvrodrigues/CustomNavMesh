@@ -8,6 +8,8 @@ using UnityEngine.AI;
 [DisallowMultipleComponent]
 public class CustomNavMeshAgent : CustomMonoBehaviour
 {
+    HiddenNavMeshAgent hiddenAgent;
+
     /// <summary>
     /// A delegate which can be used to register callback methods to be invoked after the agent is changed.
     /// </summary>
@@ -234,14 +236,18 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     protected override void OnCustomEnable()
     {
         // calling the NavMeshObstacle property will add an obstacle if gameObject doesn't have it
-        // the custom inspector will only hide after a split second so update the flags now; 
+        // the custom inspector will only hide after a split second so update the flags now 
         NavMeshAgent.hideFlags = HideFlags.HideInInspector;
         NavMeshAgent.enabled = true;
+
+        TryCreatingHiddenAgent();
     }
 
     protected override void OnCustomDisable()
     {
         NavMeshAgent.enabled = false;
+
+        TryDestroyingHiddenAgent();
     }
 
     protected override void OnCustomDestroy()
@@ -249,6 +255,36 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         if (gameObject.activeInHierarchy) // used to avoid destroying things twice, when gameObject is destroyed
         {
             Undo.DestroyObjectImmediate(NavMeshAgent);
+        }
+    }
+
+    void TryCreatingHiddenAgent()
+    {
+        if (hiddenAgent == null)
+        {
+            var hiddenObject = new GameObject("(Hidden) " + name);
+            hiddenObject.hideFlags = HideFlags.NotEditable;
+            hiddenObject.transform.SetParent(transform.parent);
+            hiddenObject.transform.position = transform.position;
+            hiddenObject.transform.rotation = transform.rotation;
+            hiddenObject.transform.localScale = transform.localScale;
+
+#if UNITY_EDITOR
+            var staticFlags = GameObjectUtility.GetStaticEditorFlags(gameObject);
+            GameObjectUtility.SetStaticEditorFlags(hiddenObject, staticFlags);
+#else
+        hiddenObject.isStatic = gameObject.isStatic;
+#endif
+
+            hiddenAgent = hiddenObject.AddComponent<HiddenNavMeshAgent>();
+        }
+    }
+
+    void TryDestroyingHiddenAgent()
+    {
+        if (hiddenAgent != null)
+        {
+            DestroyImmediate(hiddenAgent.gameObject);
         }
     }
 }

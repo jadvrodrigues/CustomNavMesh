@@ -194,7 +194,7 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
     protected override void OnCustomEnable()
     {
         // calling the NavMeshObstacle property will add an obstacle if gameObject doesn't have it
-        // the custom inspector will only hide after a split second so update the flags now; 
+        // the custom inspector will only hide after a split second so update the flags now 
         NavMeshObstacle.hideFlags = HideFlags.HideInInspector;
         NavMeshObstacle.enabled = true;
 
