@@ -8,8 +8,6 @@ using UnityEngine.AI;
 [DisallowMultipleComponent]
 public class CustomNavMeshAgent : CustomMonoBehaviour
 {
-    HiddenNavMeshAgent hiddenAgent;
-
     /// <summary>
     /// A delegate which can be used to register callback methods to be invoked after the agent is changed.
     /// </summary>
@@ -177,6 +175,23 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_AvoidancePriority = value; NavMeshAgent.avoidancePriority = value; onChange?.Invoke(); }
     }
 
+    HiddenNavMeshAgent hiddenAgent;
+    HiddenNavMeshAgent HiddenAgent
+    {
+        get
+        {
+            if (hiddenAgent == null)
+            {
+                CustomNavMesh.TryGetHiddenAgent(this, out hiddenAgent);
+            }
+            return hiddenAgent;
+        }
+        set
+        {
+            CustomNavMesh.RegisterCustomAgent(this, value);
+        }
+    }
+
     NavMeshAgent navMeshAgent;
     NavMeshAgent NavMeshAgent
     {
@@ -260,7 +275,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
 
     void TryCreatingHiddenAgent()
     {
-        if (hiddenAgent == null)
+        if (HiddenAgent == null)
         {
             var hiddenObject = new GameObject("(Hidden) " + name);
             hiddenObject.hideFlags = HideFlags.NotEditable;
@@ -276,15 +291,15 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         hiddenObject.isStatic = gameObject.isStatic;
 #endif
 
-            hiddenAgent = hiddenObject.AddComponent<HiddenNavMeshAgent>();
+            HiddenAgent = hiddenObject.AddComponent<HiddenNavMeshAgent>();
         }
     }
 
     void TryDestroyingHiddenAgent()
     {
-        if (hiddenAgent != null)
+        if (HiddenAgent != null)
         {
-            DestroyImmediate(hiddenAgent.gameObject);
+            DestroyImmediate(HiddenAgent.gameObject);
         }
     }
 }
