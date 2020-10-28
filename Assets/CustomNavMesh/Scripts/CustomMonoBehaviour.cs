@@ -142,6 +142,8 @@ public class CustomMonoBehaviour : MonoBehaviour
 
             PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
             PrefabUtility.UnloadPrefabContents(root);
+
+            Undo.ClearAll(); // not the best fix for unexpected Undo behaviour
         }
         else
         {
