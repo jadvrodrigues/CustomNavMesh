@@ -27,25 +27,25 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
         }
     }
 
-    NavMeshObstacle navMeshObstacle;
-    NavMeshObstacle NavMeshObstacle
+    NavMeshObstacle obstacle;
+    NavMeshObstacle Obstacle
     {
         get
         {
-            if (navMeshObstacle == null)
+            if (obstacle == null)
             {
-                navMeshObstacle = GetComponent<NavMeshObstacle>();
-                if (navMeshObstacle == null)
+                obstacle = GetComponent<NavMeshObstacle>();
+                if (obstacle == null)
                 {
-                    navMeshObstacle = gameObject.AddComponent<NavMeshObstacle>();
+                    obstacle = gameObject.AddComponent<NavMeshObstacle>();
                 }
                 else
                 {
                     // update existing nav mesh obstacle
-                    CustomNavMeshObstacle.TransferObstacleValues(CustomObstacle, navMeshObstacle);
+                    CustomNavMeshObstacle.TransferObstacleValues(CustomObstacle, obstacle);
                 }
             }
-            return navMeshObstacle;
+            return obstacle;
         }
     }
 
@@ -84,6 +84,7 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
         }
 
         UpdateObstacle();
+        UpdateMesh();
         UpdateVisibility();
         UpdatePosition();
 
@@ -124,12 +125,12 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
 
     void UpdateObstacle()
     {
-        if (CustomObstacle != null && NavMeshObstacle != null)
+        if (CustomObstacle != null && Obstacle != null)
         {
 #if UNITY_EDITOR
-            Undo.RecordObject(NavMeshObstacle, "");
+            Undo.RecordObject(Obstacle, "");
 #endif
-            CustomNavMeshObstacle.TransferObstacleValues(CustomObstacle, NavMeshObstacle);
+            CustomNavMeshObstacle.TransferObstacleValues(CustomObstacle, Obstacle);
         }
     }
 
@@ -141,14 +142,14 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
 #if UNITY_EDITOR
             Undo.RecordObject(meshFilter, "");
 #endif
-            switch (NavMeshObstacle.shape)
+            switch (Obstacle.shape)
             {
                 case NavMeshObstacleShape.Box:
-                    meshFilter.sharedMesh = PrimitiveType.Cube.CreateScaledMesh(NavMeshObstacle.size);
+                    meshFilter.sharedMesh = PrimitiveType.Cube.CreateScaledMesh(Obstacle.size);
                     break;
                 case NavMeshObstacleShape.Capsule:
-                    float radius = NavMeshObstacle.radius;
-                    float height = NavMeshObstacle.height;
+                    float radius = Obstacle.radius;
+                    float height = Obstacle.height;
                     Vector3 scale = new Vector3(radius * 2f, height, radius * 2f);
                     meshFilter.sharedMesh = PrimitiveType.Capsule.CreateScaledMesh(scale);
                     break;

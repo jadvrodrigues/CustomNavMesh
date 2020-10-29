@@ -188,7 +188,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         }
         set
         {
-            CustomNavMesh.RegisterCustomAgent(this, value);
+            hiddenAgent = value;
         }
     }
 
@@ -292,6 +292,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
 #endif
 
             HiddenAgent = hiddenObject.AddComponent<HiddenNavMeshAgent>();
+            // CustomNavMesh.RegisterCustomAgent(this, HiddenAgent);
         }
     }
 
