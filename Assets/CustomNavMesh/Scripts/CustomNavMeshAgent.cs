@@ -290,9 +290,8 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
 #else
         hiddenObject.isStatic = gameObject.isStatic;
 #endif
-
             HiddenAgent = hiddenObject.AddComponent<HiddenNavMeshAgent>();
-            // CustomNavMesh.RegisterCustomAgent(this, HiddenAgent);
+            CustomNavMesh.RegisterCustomAgent(this, HiddenAgent);
         }
     }
 

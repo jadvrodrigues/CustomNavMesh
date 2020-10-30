@@ -47,13 +47,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 
     protected override void OnCustomEnable()
     {
-        // destroy self if it isn't associated with a CustomNavMeshAgent component
-        if (CustomAgent == null)
-        {
-            DestroyImmediate(this);
-            return;
-        }
-
         var meshFilter = GetComponent<MeshFilter>();
         if (meshFilter == null)
         {
@@ -66,11 +59,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             meshRenderer = gameObject.AddComponent<MeshRenderer>();
             meshRenderer.sharedMaterial = CustomNavMesh.HiddenAgentMaterial;
         }
-
-        UpdateAgent();
-        UpdateMesh();
-        UpdateVisibility();
-        UpdatePosition();
 
         TrySubscribe();
     }
@@ -87,16 +75,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         TrySubscribe();
     }
 
-    // hide Update method because this has to be triggered both inside and outside 
-    // of Play mode and the inherited OnCustomUpdate is only called in Play mode
-    new void Update()
-    {
-        if (transform.hasChanged)
-        {
-            UpdateTransform();
-        }
-    }
-
     void UpdateAgent()
     {
         if (CustomAgent != null && Agent != null)
@@ -111,7 +89,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     void UpdateMesh()
     {
         var meshFilter = GetComponent<MeshFilter>();
-        if (meshFilter != null)
+        if (meshFilter != null && CustomAgent != null)
         {
 #if UNITY_EDITOR
             Undo.RecordObject(meshFilter, "");
