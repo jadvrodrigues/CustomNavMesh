@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!21 &-8943659930494546546
+--- !u!21 &-8349683954842701448
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
@@ -21,7 +21,7 @@ Material:
     m_TexEnvs: []
     m_Floats: []
     m_Colors:
-    - _Color: {r: 0.5215687, g: 0.5215687, b: 0.5215687, a: 1}
+    - _Color: {r: 0.6235294, g: 0.2509804, b: 0.2509804, a: 1}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0

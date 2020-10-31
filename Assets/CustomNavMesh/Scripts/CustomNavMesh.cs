@@ -140,7 +140,7 @@ public class CustomNavMesh : ScriptableObject
                 };
 
 #if UNITY_EDITOR
-                if (!AssetDatabase.Contains(Instance.hiddenSurfaceMaterial))
+                if (AssetDatabase.Contains(Instance) && !AssetDatabase.Contains(Instance.hiddenSurfaceMaterial))
                 {
                     AssetDatabase.AddObjectToAsset(Instance.hiddenSurfaceMaterial, Instance);
                 }
@@ -171,7 +171,7 @@ public class CustomNavMesh : ScriptableObject
                 };
 
 #if UNITY_EDITOR
-                if (!AssetDatabase.Contains(Instance.hiddenAgentMaterial))
+                if (AssetDatabase.Contains(Instance) && !AssetDatabase.Contains(Instance.hiddenAgentMaterial))
                 {
                     AssetDatabase.AddObjectToAsset(Instance.hiddenAgentMaterial, Instance);
                 }
@@ -203,7 +203,7 @@ public class CustomNavMesh : ScriptableObject
                 };
 
 #if UNITY_EDITOR
-                if (!AssetDatabase.Contains(Instance.hiddenObstacleMaterial))
+                if (AssetDatabase.Contains(Instance) && !AssetDatabase.Contains(Instance.hiddenObstacleMaterial))
                 {
                     AssetDatabase.AddObjectToAsset(Instance.hiddenObstacleMaterial, Instance);
                 }
