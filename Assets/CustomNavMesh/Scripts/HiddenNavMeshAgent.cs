@@ -37,11 +37,31 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
                 }
                 else
                 {
-                    // update existing nav mesh agent
-                    CustomNavMeshAgent.TransferAgentValues(CustomAgent, agent);
+                    UpdateAgent();
                 }
             }
             return agent;
+        }
+    }
+
+    NavMeshObstacle obstacle;
+    NavMeshObstacle Obstacle
+    {
+        get
+        {
+            if (obstacle == null)
+            {
+                obstacle = GetComponent<NavMeshObstacle>();
+                if (obstacle == null)
+                {
+                    obstacle = gameObject.AddComponent<NavMeshObstacle>();
+                }
+                else
+                {
+                    UpdateAgent();
+                }
+            }
+            return obstacle;
         }
     }
 
@@ -74,6 +94,20 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             meshRenderer = gameObject.AddComponent<MeshRenderer>();
             meshRenderer.sharedMaterial = CustomNavMesh.HiddenAgentMaterial;
         }
+
+        obstacle = GetComponent<NavMeshObstacle>();
+        if (obstacle == null)
+        {
+            obstacle = gameObject.AddComponent<NavMeshObstacle>();
+            obstacle.carving = true;
+        }
+        obstacle.enabled = false;
+
+        agent = GetComponent<NavMeshAgent>();
+        if (agent == null)
+        {
+            agent = gameObject.AddComponent<NavMeshAgent>();
+        }
     }
 
     protected override void OnCustomDisable()
@@ -95,8 +129,17 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 #if UNITY_EDITOR
             Undo.RecordObject(Agent, "");
 #endif
+            // Update my NavMeshAgent
             CustomNavMeshAgent.TransferAgentValues(CustomAgent, Agent);
             Agent.baseOffset = CustomAgent.Height / 2.0f; // keep mesh centered
+
+#if UNITY_EDITOR         
+            Undo.RecordObject(Obstacle, "");
+#endif
+            // Update my NavMeshObstacle
+            Obstacle.carvingMoveThreshold = CustomAgent.CarvingMoveThreshold;
+            Obstacle.carvingTimeToStationary = CustomAgent.CarvingTimeToStationary;
+            Obstacle.carveOnlyStationary = CustomAgent.CarveOnlyStationary;
         }
     }
 
@@ -106,25 +149,49 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         if (meshFilter != null && CustomAgent != null)
         {
 #if UNITY_EDITOR
+            Undo.RecordObject(Obstacle, "");
+#endif
+            var height = CustomAgent.Height;
+            var radius = CustomAgent.Radius;
+
+            var scale = CustomAgent.transform.localScale;
+            var realHeight = height * Mathf.Abs(scale.y);
+            var realRadius = radius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.z));
+
+            if (realHeight / 2.0f < realRadius)
+            {
+                Obstacle.shape = NavMeshObstacleShape.Box;
+                Obstacle.size = new Vector3(radius * 2.0f, height, radius * 2.0f);
+            }
+            else
+            {
+                Obstacle.shape = NavMeshObstacleShape.Capsule;
+                Obstacle.height = height;
+                Obstacle.radius = radius;
+            }
+
+#if UNITY_EDITOR
             Undo.RecordObject(meshFilter, "");
 #endif
-            float radius = CustomAgent.Radius;
-            float height = CustomAgent.Height;
-            Vector3 scale = new Vector3(radius * 2f, height / 2f, radius * 2f);
 
-            //adjust for CustomAgent local scale (so it looks like the NavMeshAgent cyllinder in the CustomAgent)
-            var xScale = Mathf.Abs(CustomAgent.transform.localScale.x);
-            var zScale = Mathf.Abs(CustomAgent.transform.localScale.z);
-
-            if (xScale == 0.0f) xScale = 1.0f;
-            if (zScale == 0.0f) zScale = 1.0f;
-
-            if (xScale < zScale)
-                scale.x *= zScale / xScale;
-            else 
-                scale.z *= xScale / zScale;
-
-            meshFilter.sharedMesh = PrimitiveType.Cylinder.CreateScaledMesh(scale);
+            if(Agent.enabled)
+            {
+                Vector3 meshScale = new Vector3(radius * 2f, height / 2f, radius * 2f);
+                meshFilter.sharedMesh = PrimitiveType.Cylinder.CreateScaledMesh(meshScale);
+            }
+            else
+            {
+                if(Obstacle.shape == NavMeshObstacleShape.Box)
+                {
+                    Vector3 meshScale = new Vector3(radius * 2f, height, radius * 2f);
+                    meshFilter.sharedMesh = PrimitiveType.Cube.CreateScaledMesh(meshScale);
+                }
+                else
+                {
+                    Vector3 meshScale = new Vector3(radius * 2f, height / 2f, radius * 2f);
+                    meshFilter.sharedMesh = PrimitiveType.Capsule.CreateScaledMesh(meshScale);
+                }
+            }
         }
     }
 
@@ -153,9 +220,12 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 
             UpdatePosition();
 
-            if (transform.localScale != customTransform.localScale)
+            var radiusScale = Mathf.Max(Mathf.Abs(customTransform.localScale.x), Mathf.Abs(customTransform.localScale.z));
+            Vector3 newScale = new Vector3(radiusScale, customTransform.localScale.y, radiusScale);
+
+            if (transform.localScale != newScale)
             {
-                transform.localScale = customTransform.localScale;
+                transform.localScale = newScale;
                 UpdateMesh();
             }
 
