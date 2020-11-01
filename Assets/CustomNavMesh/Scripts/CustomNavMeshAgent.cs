@@ -185,6 +185,84 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_AvoidancePriority = value; NavMeshAgent.avoidancePriority = value; onChange?.Invoke(); }
     }
 
+    /// </summary>
+    [SerializeField] bool m_AutoBlock = true;
+    /// <summary>
+    /// Should the hidden agent turn into an obstacle when this agent hasn't moved much
+    /// so the other agents can avoid it in their paths?
+    /// </summary>
+    public bool AutoBlock
+    {
+        get { return m_AutoBlock; }
+        set { m_AutoBlock = value; }
+    }
+
+    [SerializeField] float m_TimeToBlock = 2.5f;
+    /// <summary>
+    /// Time in seconds needed for the hidden agent to switch from agent to obstacle, 
+    /// assuming it hasn't surpassed the UnblockSpeedTreshold during the interval.
+    /// </summary>
+    public float TimeToBlock
+    {
+        get { return m_TimeToBlock; }
+        set { m_TimeToBlock = value; }
+    }
+
+    [SerializeField] float m_UnblockSpeedThreshold = 0.1f;
+    /// <summary>
+    /// Speed at which the hidden agent turns into an agent again if it is currently 
+    /// in obstacle mode.
+    /// </summary>
+    public float UnblockSpeedThreshold
+    {
+        get { return m_UnblockSpeedThreshold; }
+        set { m_UnblockSpeedThreshold = value; }
+    }
+
+    [SerializeField] float m_BlockRefreshInterval = 1.0f;
+    /// <summary>
+    /// Time in seconds needed for the hidden agent to check if it should change to agent again, 
+    /// assuming it is currently in obstacle mode.
+    /// </summary>
+    public float BlockRefreshInterval
+    {
+        get { return m_BlockRefreshInterval; }
+        set { m_BlockRefreshInterval = value; }
+    }
+
+    [SerializeField] float m_MoveThreshold = 0.1f;
+    /// <summary>
+    /// This refers to the hidden agent's obstacle when blocking. Threshold distance 
+    /// for updating a moving carved hole.
+    /// </summary>
+    public float CarvingMoveThreshold
+    {
+        get { return m_MoveThreshold; }
+        set { m_MoveThreshold = value; onChange?.Invoke(); }
+    }
+
+    [SerializeField] float m_TimeToStationary = 0.5f;
+    /// <summary>
+    /// This refers to the hidden agent's obstacle when blocking. Time to wait until 
+    /// the obstacle is treated as stationary (when CarveOnlyStationary is enabled).
+    /// </summary>
+    public float CarvingTimeToStationary
+    {
+        get { return m_TimeToStationary; }
+        set { m_TimeToStationary = value; onChange?.Invoke(); }
+    }
+
+    [SerializeField] bool m_CarveOnlyStationary = true;
+    /// <summary>
+    /// This refers to the hidden agent's obstacle when blocking. Should the obstacle be carved 
+    /// when it is constantly moving?
+    /// </summary>
+    public bool CarveOnlyStationary
+    {
+        get { return m_CarveOnlyStationary; }
+        set { m_CarveOnlyStationary = value; onChange?.Invoke(); }
+    }
+
     HiddenNavMeshAgent hiddenAgent;
     HiddenNavMeshAgent HiddenAgent
     {
