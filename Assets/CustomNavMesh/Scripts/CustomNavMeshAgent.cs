@@ -20,11 +20,20 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     /// <summary>
     /// A delegate which can be used to register callback methods to be invoked after the agent's radius or height is changed.
     /// </summary>
-    public delegate void OnSizeChange();
+    public delegate void OnAgentMeshChange();
     /// <summary>
-    /// Subscribe a function to be called after the agent's radius or height is changed.
+    /// Subscribe a function to be called after the agent's radius or height is changed. Note: always invoked after onChange.
     /// </summary>
-    public event OnSizeChange onSizeChange;
+    public event OnAgentMeshChange onAgentMeshChange;
+
+    /// <summary>
+    /// A delegate which can be used to register callback methods to be invoked after the agent's height or baseOffset is changed.
+    /// </summary>
+    public delegate void OnAgentPositionChange();
+    /// <summary>
+    /// Subscribe a function to be called after the agent's height or baseOffset is changed. Note: always invoked after onChange.
+    /// </summary>
+    public event OnAgentPositionChange onAgentPositionChange;
 
     /// <summary>
     /// A delegate which can be used to register callback methods to be invoked after the agent's transform is changed.
@@ -33,7 +42,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     /// <summary>
     /// Subscribe a function to be called after the agent's transform is changed.
     /// </summary>
-    public event OnSizeChange onTransformChange;
+    public event OnAgentMeshChange onTransformChange;
 
     [SerializeField] int m_AgentTypeID;
     /// <summary>
@@ -52,7 +61,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     public float Radius
     {
         get { return m_Radius; }
-        set { m_Radius = value; NavMeshAgent.radius = value; onChange?.Invoke(); onSizeChange?.Invoke(); }
+        set { m_Radius = value; NavMeshAgent.radius = value; onChange?.Invoke(); onAgentMeshChange?.Invoke(); }
     }
 
     [SerializeField] float m_Height = 2.0f;
@@ -62,7 +71,8 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     public float Height
     {
         get { return m_Height; }
-        set { m_Height = value; NavMeshAgent.height = value; onChange?.Invoke(); onSizeChange?.Invoke(); }
+        set { m_Height = value; NavMeshAgent.height = value; 
+            onChange?.Invoke(); onAgentMeshChange?.Invoke(); onAgentPositionChange?.Invoke(); }
     }
 
     [SerializeField] int m_WalkableMask = -1;
@@ -145,14 +155,14 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_AutoRepath = value; NavMeshAgent.autoRepath = value; onChange?.Invoke(); }
     }
 
-    [SerializeField] float m_BaseOffset;
+    [SerializeField] float m_BaseOffset = 1.0f;
     /// <summary>
     /// The relative vertical displacement of the owning GameObject.
     /// </summary>
     public float BaseOffset
     {
         get { return m_BaseOffset; }
-        set { m_BaseOffset = value; NavMeshAgent.baseOffset = value; onChange?.Invoke(); }
+        set { m_BaseOffset = value; NavMeshAgent.baseOffset = value; onChange?.Invoke(); onAgentPositionChange?.Invoke(); }
     }
 
     [SerializeField] ObstacleAvoidanceType m_ObstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
@@ -280,9 +290,6 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
             var hiddenObject = new GameObject("(Hidden) " + name);
             hiddenObject.hideFlags = HideFlags.NotEditable;
             hiddenObject.transform.SetParent(transform.parent);
-            hiddenObject.transform.position = transform.position;
-            hiddenObject.transform.rotation = transform.rotation;
-            hiddenObject.transform.localScale = transform.localScale;
 
 #if UNITY_EDITOR
             var staticFlags = GameObjectUtility.GetStaticEditorFlags(gameObject);

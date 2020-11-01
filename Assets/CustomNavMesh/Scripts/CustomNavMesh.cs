@@ -229,6 +229,8 @@ public class CustomNavMesh : ScriptableObject
     {
         Instance.customToHiddenAgents[customAgent.gameObject] = hiddenAgent.gameObject;
         Instance.hiddenToCustomAgents[hiddenAgent.gameObject] = customAgent.gameObject;
+
+        hiddenAgent.OnRegister();
     }
 
     /// <summary>

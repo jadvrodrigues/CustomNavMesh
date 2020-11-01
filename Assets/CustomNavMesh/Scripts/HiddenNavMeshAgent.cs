@@ -45,6 +45,21 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Update everything. To be called from CustomNavMesh when this get registered. Note: in the 
+    /// agent and in the obstacle classes, this initialization is done in OnCustomEnable; however, 
+    /// in this case the CustomAgent is still null during OnCustomEnable.
+    /// </summary>
+    public void OnRegister()
+    {
+        UpdateAgent();
+        UpdateMesh();
+        UpdateVisibility();
+        UpdateTransform();
+
+        TrySubscribe();
+    }
+
     protected override void OnCustomEnable()
     {
         var meshFilter = GetComponent<MeshFilter>();
@@ -59,8 +74,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             meshRenderer = gameObject.AddComponent<MeshRenderer>();
             meshRenderer.sharedMaterial = CustomNavMesh.HiddenAgentMaterial;
         }
-
-        TrySubscribe();
     }
 
     protected override void OnCustomDisable()
@@ -83,6 +96,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             Undo.RecordObject(Agent, "");
 #endif
             CustomNavMeshAgent.TransferAgentValues(CustomAgent, Agent);
+            Agent.baseOffset = CustomAgent.Height / 2.0f; // keep mesh centered
         }
     }
 
@@ -96,8 +110,21 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 #endif
             float radius = CustomAgent.Radius;
             float height = CustomAgent.Height;
-            Vector3 scale = new Vector3(radius * 2f, height, radius * 2f);
-            meshFilter.sharedMesh = PrimitiveType.Capsule.CreateScaledMesh(scale);
+            Vector3 scale = new Vector3(radius * 2f, height / 2f, radius * 2f);
+
+            //adjust for CustomAgent local scale (so it looks like the NavMeshAgent cyllinder in the CustomAgent)
+            var xScale = Mathf.Abs(CustomAgent.transform.localScale.x);
+            var zScale = Mathf.Abs(CustomAgent.transform.localScale.z);
+
+            if (xScale == 0.0f) xScale = 1.0f;
+            if (zScale == 0.0f) zScale = 1.0f;
+
+            if (xScale < zScale)
+                scale.x *= zScale / xScale;
+            else 
+                scale.z *= xScale / zScale;
+
+            meshFilter.sharedMesh = PrimitiveType.Cylinder.CreateScaledMesh(scale);
         }
     }
 
@@ -122,8 +149,9 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 #endif
             var customTransform = CustomAgent.transform;
             transform.parent = customTransform.parent; // prevent from being changed
-            transform.position = customTransform.position + CustomNavMesh.HiddenTranslation;
             transform.rotation = customTransform.rotation;
+
+            UpdatePosition();
 
             if (transform.localScale != customTransform.localScale)
             {
@@ -142,7 +170,10 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 #if UNITY_EDITOR
             Undo.RecordObject(transform, "");
 #endif
-            transform.position = CustomAgent.transform.position + CustomNavMesh.HiddenTranslation;
+            transform.position = CustomAgent.transform.position + CustomNavMesh.HiddenTranslation + 
+                (CustomAgent.Height / 2.0f * Mathf.Sign(CustomAgent.transform.localScale.y) - CustomAgent.BaseOffset) * 
+                Vector3.up * CustomAgent.transform.localScale.y;
+
             transform.hasChanged = false;
         }
     }
@@ -154,8 +185,9 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             if (CustomAgent != null)
             {
                 CustomAgent.onChange += UpdateAgent;
-                CustomAgent.onSizeChange += UpdateMesh;
                 CustomAgent.onTransformChange += UpdateTransform;
+                CustomAgent.onAgentMeshChange += UpdateMesh;
+                CustomAgent.onAgentPositionChange += UpdatePosition;
             }
 
             CustomNavMesh.onRenderHiddenUpdate += UpdateVisibility;
@@ -172,8 +204,9 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             if (CustomAgent != null)
             {
                 CustomAgent.onChange -= UpdateAgent;
-                CustomAgent.onSizeChange -= UpdateMesh;
                 CustomAgent.onTransformChange -= UpdateTransform;
+                CustomAgent.onAgentMeshChange -= UpdateMesh;
+                CustomAgent.onAgentPositionChange -= UpdatePosition;
             }
 
             CustomNavMesh.onRenderHiddenUpdate -= UpdateVisibility;
