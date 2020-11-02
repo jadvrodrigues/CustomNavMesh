@@ -36,13 +36,40 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     public event OnAgentPositionChange onAgentPositionChange;
 
     /// <summary>
-    /// A delegate which can be used to register callback methods to be invoked after the agent's transform is changed.
+    /// A delegate which can be used to register callback methods to be invoked after the agent's parent is changed.
     /// </summary>
-    public delegate void OnTransformChange();
+    public delegate void OnParentChange();
     /// <summary>
-    /// Subscribe a function to be called after the agent's transform is changed.
+    /// Subscribe a function to be called after the agent's parent is changed.
     /// </summary>
-    public event OnAgentMeshChange onTransformChange;
+    public event OnParentChange onParentChange;
+
+    /// <summary>
+    /// A delegate which can be used to register callback methods to be invoked after the agent's local position is changed.
+    /// </summary>
+    public delegate void OnPositionChange();
+    /// <summary>
+    /// Subscribe a function to be called after the agent's local position is changed.
+    /// </summary>
+    public event OnPositionChange onPositionChange;
+
+    /// <summary>
+    /// A delegate which can be used to register callback methods to be invoked after the agent's local rotation is changed.
+    /// </summary>
+    public delegate void OnRotationChange();
+    /// <summary>
+    /// Subscribe a function to be called after the agent's local rotation is changed.
+    /// </summary>
+    public event OnRotationChange onRotationChange;
+
+    /// <summary>
+    /// A delegate which can be used to register callback methods to be invoked after the agent's local scale is changed.
+    /// </summary>
+    public delegate void OnScaleChange();
+    /// <summary>
+    /// Subscribe a function to be called after the agent's local scale is changed.
+    /// </summary>
+    public event OnScaleChange onScaleChange;
 
     [SerializeField] int m_AgentTypeID;
     /// <summary>
@@ -302,6 +329,79 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         }
     }
 
+    Transform savedParent;
+    Transform SavedParent
+    {
+        get
+        {
+            if (savedParent == null)
+            {
+                savedParent = transform.parent;
+            }
+            return savedParent;
+        }
+        set
+        {
+            savedParent = value;
+        }
+    }
+
+    Vector3? savedPosition;
+    Vector3? SavedPosition
+    {
+        get
+        {
+            if (!savedPosition.HasValue)
+            {
+                savedPosition = transform.localPosition;
+            }
+            return savedPosition;
+        }
+        set
+        {
+            savedPosition = value;
+        }
+    }
+
+    Vector3? savedRotation;
+    Vector3? SavedRotation
+    {
+        get
+        {
+            if (!savedRotation.HasValue)
+            {
+                savedRotation = transform.localRotation.eulerAngles;
+            }
+            return savedRotation;
+        }
+        set
+        {
+            savedRotation = value;
+        }
+    }
+
+    Vector3? savedScale;
+    Vector3? SavedScale
+    {
+        get
+        {
+            if (!savedScale.HasValue)
+            {
+                savedScale = transform.localScale;
+            }
+            return savedScale;
+        }
+        set
+        {
+            savedScale = value;
+        }
+    }
+
+    public bool SetDestination(Vector3 target)
+    {
+        return HiddenAgent.SetDestination(target + CustomNavMesh.HiddenTranslation);
+    }
+
     /// <summary>
     /// Transfers the parameters of a CustomNavMeshAgent to a NavMeshAgent.
     /// </summary>
@@ -331,8 +431,36 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     {
         if (transform.hasChanged)
         {
-            onTransformChange?.Invoke();
+            if (SavedPosition != transform.localPosition)
+            {
+                SavedPosition = transform.localPosition;
+                onPositionChange?.Invoke();
+            }
+
+            if (SavedParent != transform.parent)
+            {
+                SavedParent = transform.parent;
+                onParentChange?.Invoke();
+            }
+
+            if (SavedRotation != transform.localRotation.eulerAngles)
+            {
+                SavedRotation = transform.localRotation.eulerAngles;
+                onRotationChange?.Invoke();
+            }
+
+            if (SavedScale != transform.localScale)
+            {
+                SavedScale = transform.localScale;
+                onScaleChange?.Invoke();
+            }
+
             transform.hasChanged = false;
+        }
+
+        if (HiddenAgent)
+        {
+            NavMeshAgent.velocity = HiddenAgent.Velocity;
         }
     }
 

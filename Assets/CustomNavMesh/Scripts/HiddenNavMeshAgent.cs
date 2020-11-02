@@ -10,6 +10,36 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 {
     bool subscribed; // used to avoid subscribing twice
 
+    Vector3? destination;
+    float timeStopped;
+
+    /// <summary>
+    /// Access the current velocity of the hidden agent component.
+    /// Returns Vector3.zero if it's currently in block mode. 
+    /// </summary>
+    public Vector3 Velocity
+    {
+        get
+        {
+            if (Agent.enabled)
+            {
+                float magnitude = Agent.velocity.magnitude;
+                if (magnitude <= CustomAgent.Speed)
+                {
+                    return Agent.velocity;
+                }
+                else
+                {
+                    return Agent.velocity / magnitude * CustomAgent.Speed;
+                }
+            }
+            else
+            {
+                return Vector3.zero;
+            }
+        }
+    }
+
     CustomNavMeshAgent customAgent;
     CustomNavMeshAgent CustomAgent
     {
@@ -59,10 +89,65 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
                 else
                 {
                     UpdateAgent();
+                    UpdateMesh(); // Obstacle size is set in UpdateMesh
                 }
             }
             return obstacle;
         }
+    }
+
+    bool isBlocking;
+    bool IsBlocking
+    {
+        get { return isBlocking; }
+        set
+        {
+            if (Application.isPlaying && isBlocking != value)
+            {
+                isBlocking = value;
+                if (value)
+                {
+                    agent.enabled = false;
+                    obstacle.enabled = true;
+                }
+                else
+                {
+                    obstacle.enabled = false;
+                    agent.enabled = true;
+
+                    timeStopped = 0.0f;
+
+                    if (destination.HasValue)
+                    {
+                        agent.SetDestination(destination.Value);
+                    }
+                }
+            }
+        }
+    }
+
+    Vector3? lastPosition;
+    Vector3? LastPosition
+    {
+        get
+        {
+            if(!lastPosition.HasValue)
+            {
+                lastPosition = transform.position;
+            }
+            return lastPosition;
+        }
+        set
+        {
+            lastPosition = value;
+        }
+    }
+
+    public bool SetDestination(Vector3 target)
+    {
+        IsBlocking = false;
+        destination = target;
+        return agent.SetDestination(target);
     }
 
     /// <summary>
@@ -75,7 +160,11 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         UpdateAgent();
         UpdateMesh();
         UpdateVisibility();
-        UpdateTransform();
+
+        UpdateParent();
+        UpdatePosition();
+        UpdateRotation();
+        UpdateScale();
 
         TrySubscribe();
     }
@@ -120,6 +209,42 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     new void Start()
     {
         TrySubscribe();
+    }
+
+    protected override void OnCustomUpdate()
+    {
+        Vector3 agentPos = CustomAgent.transform.position;
+        Vector3 translation = CustomNavMesh.HiddenTranslation;        
+        
+        // why not call UpdatePosition? it is slower, does unnecessary calculations
+        transform.position = new Vector3(
+            agentPos.x + translation.x,
+            transform.position.y,
+            agentPos.z + translation.z);
+
+        if (Vector3.Distance(transform.position, LastPosition.Value) / Time.deltaTime < CustomAgent.UnblockSpeedThreshold)
+        {
+            if (!IsBlocking)
+            {
+                timeStopped += Time.deltaTime;
+
+                if (timeStopped >= CustomAgent.TimeToBlock)
+                {
+                    IsBlocking = true;
+                }
+            }
+        }
+        else
+        {
+            timeStopped = 0.0f;
+
+            if (IsBlocking)
+            {
+                IsBlocking = false;
+            }
+        }
+
+        LastPosition = transform.position;
     }
 
     void UpdateAgent()
@@ -207,7 +332,43 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         }
     }
 
-    void UpdateTransform()
+    void UpdateParent()
+    {
+        if (CustomAgent != null)
+        {
+#if UNITY_EDITOR
+            Undo.RecordObject(transform, "");
+#endif
+            transform.parent = CustomAgent.transform.parent;
+        }
+    }
+
+    void UpdatePosition()
+    {
+        if (CustomAgent != null)
+        {
+#if UNITY_EDITOR
+            Undo.RecordObject(transform, "");
+#endif
+            transform.position = customAgent.transform.position + CustomNavMesh.HiddenTranslation +
+                (customAgent.Height / 2.0f * Mathf.Sign(customAgent.transform.localScale.y) - customAgent.BaseOffset) *
+                Vector3.up * customAgent.transform.localScale.y;
+        }
+    }
+
+    void UpdateRotation()
+    {
+        if (CustomAgent != null)
+        {
+#if UNITY_EDITOR
+            Undo.RecordObject(transform, "");
+#endif
+            transform.rotation = CustomAgent.transform.rotation;
+        }
+    }
+
+
+    void UpdateScale()
     {
         if (CustomAgent != null)
         {
@@ -215,8 +376,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             Undo.RecordObject(transform, "");
 #endif
             var customTransform = CustomAgent.transform;
-            transform.parent = customTransform.parent; // prevent from being changed
-            transform.rotation = customTransform.rotation;
 
             UpdatePosition();
 
@@ -228,23 +387,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
                 transform.localScale = newScale;
                 UpdateMesh();
             }
-
-            transform.hasChanged = false;
-        }
-    }
-
-    void UpdatePosition()
-    {
-        if (CustomAgent != null)
-        {
-#if UNITY_EDITOR
-            Undo.RecordObject(transform, "");
-#endif
-            transform.position = CustomAgent.transform.position + CustomNavMesh.HiddenTranslation + 
-                (CustomAgent.Height / 2.0f * Mathf.Sign(CustomAgent.transform.localScale.y) - CustomAgent.BaseOffset) * 
-                Vector3.up * CustomAgent.transform.localScale.y;
-
-            transform.hasChanged = false;
         }
     }
 
@@ -255,9 +397,19 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             if (CustomAgent != null)
             {
                 CustomAgent.onChange += UpdateAgent;
-                CustomAgent.onTransformChange += UpdateTransform;
                 CustomAgent.onAgentMeshChange += UpdateMesh;
                 CustomAgent.onAgentPositionChange += UpdatePosition;
+
+                CustomAgent.onParentChange += UpdateParent;
+                CustomAgent.onRotationChange += UpdateRotation;
+                CustomAgent.onScaleChange += UpdateScale;
+
+                // only subscribe if it's currently outside of play mode because in play 
+                // mode the position is already set in the OnCustomUpdate method
+                if (!Application.isPlaying)
+                {
+                    CustomAgent.onPositionChange += UpdatePosition;
+                }
             }
 
             CustomNavMesh.onRenderHiddenUpdate += UpdateVisibility;
@@ -274,9 +426,17 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             if (CustomAgent != null)
             {
                 CustomAgent.onChange -= UpdateAgent;
-                CustomAgent.onTransformChange -= UpdateTransform;
                 CustomAgent.onAgentMeshChange -= UpdateMesh;
                 CustomAgent.onAgentPositionChange -= UpdatePosition;
+
+                CustomAgent.onParentChange -= UpdateParent;
+                CustomAgent.onRotationChange -= UpdateRotation;
+                CustomAgent.onScaleChange -= UpdateScale;
+
+                if (!Application.isPlaying)
+                {
+                    CustomAgent.onPositionChange -= UpdatePosition;
+                }
             }
 
             CustomNavMesh.onRenderHiddenUpdate -= UpdateVisibility;

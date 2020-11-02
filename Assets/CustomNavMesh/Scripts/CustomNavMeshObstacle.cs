@@ -234,7 +234,7 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
         if (HiddenObstacle == null)
         {
             var hiddenObject = new GameObject("(Hidden) " + name);
-            hiddenObject.transform.parent = transform;
+            hiddenObject.transform.SetParent(transform, false);
             hiddenObject.hideFlags = HideFlags.NotEditable;
 
 #if UNITY_EDITOR
