@@ -397,6 +397,11 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets or updates the destination thus triggering the calculation for a new path.
+    /// </summary>
+    /// <param name="target">The target point to navigate to.</param>
+    /// <returns>True if the destination was requested successfully, otherwise false.</returns>
     public bool SetDestination(Vector3 target)
     {
         return HiddenAgent.SetDestination(target + CustomNavMesh.HiddenTranslation);
@@ -461,7 +466,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         if (HiddenAgent)
         {
             NavMeshAgent.velocity = HiddenAgent.Velocity;
-        }
+        }        
     }
 
     protected override void OnCustomEnable()
@@ -504,7 +509,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         hiddenObject.isStatic = gameObject.isStatic;
 #endif
             HiddenAgent = hiddenObject.AddComponent<HiddenNavMeshAgent>();
-            CustomNavMesh.RegisterCustomAgent(this, HiddenAgent);
+            CustomNavMesh.RegisterAgent(this, HiddenAgent);
         }
     }
 
@@ -512,6 +517,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     {
         if (HiddenAgent != null)
         {
+            CustomNavMesh.UnregisterAgent(this, HiddenAgent);
             DestroyImmediate(HiddenAgent.gameObject);
         }
     }

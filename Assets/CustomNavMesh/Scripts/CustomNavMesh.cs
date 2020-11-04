@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System.Linq;
 using System;
+using System.Linq;
+using System.Collections.Generic;
 
 /// <summary>
 /// The NavMesh singleton class replacement for using the nav mesh.
@@ -13,11 +14,6 @@ public class CustomNavMesh : ScriptableObject
     static readonly Color obstacleColor = new Color(0.6235294f, 0.2509804f, 0.2509804f); // red
 
     static bool settingsLoaded;
-
-    // Why use game object to game object dictionary instead of CustomNavMeshAgent to HiddenNavMeshAgent and 
-    // vice versa? To avoid it resetting to null and loosing the correspondence between the two.
-    [SerializeField, HideInInspector] GameObjectDictionary customToHiddenAgents = new GameObjectDictionary();
-    [SerializeField, HideInInspector] GameObjectDictionary hiddenToCustomAgents = new GameObjectDictionary();
 
     /// <summary>
     /// A delegate which can be used to register callback methods to be invoked after the 
@@ -219,18 +215,118 @@ public class CustomNavMesh : ScriptableObject
         }
     }
 
+    // Why use a GameObject to GameObject dictionary instead of CustomNavMeshAgent to HiddenNavMeshAgent? 
+    // To avoid them from resetting to null and loosing the correspondence between the two. This is the 
+    // only agent dictionary that is serialized, the others are all null after entering play mode.
+    GameObjectDictionary customToHiddenAgents;
+    Dictionary<GameObject, GameObject> CustomToHiddenAgents
+    {
+        get
+        {
+            if (customToHiddenAgents == null)
+            {
+                customToHiddenAgents = new GameObjectDictionary();
+            }
+            return customToHiddenAgents;
+        }
+    }
+
+    Dictionary<GameObject, GameObject> hiddenToCustomAgents;
+    Dictionary<GameObject, GameObject> HiddenToCustomAgents
+    {
+        get
+        {
+            if (hiddenToCustomAgents == null)
+            {
+                hiddenToCustomAgents = new Dictionary<GameObject, GameObject>();
+                foreach (var kvp in CustomToHiddenAgents)
+                {
+                    hiddenToCustomAgents.Add(kvp.Value, kvp.Key);
+                }
+            }
+            return hiddenToCustomAgents;
+        }
+    }
+
+    // Why make this playing versions of the agent correspondence dictionaries? To 
+    // manipulate them freely in play mode and discard the changes when leaving it.
+    Dictionary<GameObject, GameObject> playingCustomToHiddenAgents;
+    Dictionary<GameObject, GameObject> PlayingCustomToHiddenAgents
+    {
+        get
+        {
+            if (playingCustomToHiddenAgents == null)
+            {
+                playingCustomToHiddenAgents = new Dictionary<GameObject, GameObject>();
+                foreach (var kvp in CustomToHiddenAgents)
+                {
+                    playingCustomToHiddenAgents.Add(kvp.Key, kvp.Value);
+                }
+            }
+            return playingCustomToHiddenAgents;
+        }
+    }
+
+    Dictionary<GameObject, GameObject> playingHiddenToCustomAgents;
+    Dictionary<GameObject, GameObject> PlayingHiddenToCustomAgents
+    {
+        get
+        {
+            if (playingHiddenToCustomAgents == null)
+            {
+                playingHiddenToCustomAgents = new Dictionary<GameObject, GameObject>();
+                foreach (var kvp in CustomToHiddenAgents)
+                {
+                    playingHiddenToCustomAgents.Add(kvp.Value, kvp.Key);
+                }
+            }
+            return playingHiddenToCustomAgents;
+        }
+    }
+
     /// <summary>
     /// Register a custom agent and it's hidden agent to prevent the custom agent 
     /// from spawning more hidden agents then needed.
     /// </summary>
     /// <param name="customAgent">The custom agent</param>
     /// <param name="hiddenAgent">The hidden agent</param>
-    public static void RegisterCustomAgent(CustomNavMeshAgent customAgent, HiddenNavMeshAgent hiddenAgent)
+    public static void RegisterAgent(CustomNavMeshAgent customAgent, HiddenNavMeshAgent hiddenAgent)
     {
-        Instance.customToHiddenAgents[customAgent.gameObject] = hiddenAgent.gameObject;
-        Instance.hiddenToCustomAgents[hiddenAgent.gameObject] = customAgent.gameObject;
+        if(Application.isPlaying)
+        {
+            Instance.PlayingHiddenToCustomAgents[hiddenAgent.gameObject] = customAgent.gameObject;
+            Instance.PlayingCustomToHiddenAgents[customAgent.gameObject] = hiddenAgent.gameObject;
+        }
+        else
+        {
+            Instance.CustomToHiddenAgents[customAgent.gameObject] = hiddenAgent.gameObject;
+
+            if(Instance.hiddenToCustomAgents != null)
+            {
+                Instance.hiddenToCustomAgents[hiddenAgent.gameObject] = customAgent.gameObject;
+            }
+        }
 
         hiddenAgent.OnRegister();
+    }
+
+    /// <summary>
+    /// Unregister the correspondence betweem a custom agent and it's hidden agent.
+    /// </summary>
+    /// <param name="customAgent">The custom agent</param>
+    /// <param name="hiddenAgent">The hidden agent</param>
+    public static void UnregisterAgent(CustomNavMeshAgent customAgent, HiddenNavMeshAgent hiddenAgent)
+    {
+        if(Application.isPlaying)
+        {
+            Instance.PlayingHiddenToCustomAgents.Remove(hiddenAgent.gameObject);
+            Instance.PlayingCustomToHiddenAgents.Remove(customAgent.gameObject);
+        }
+        else
+        {
+            Instance.HiddenToCustomAgents.Remove(hiddenAgent.gameObject);
+            Instance.CustomToHiddenAgents.Remove(customAgent.gameObject);
+        }
     }
 
     /// <summary>
@@ -241,7 +337,15 @@ public class CustomNavMesh : ScriptableObject
     /// <returns></returns>
     public static bool TryGetHiddenAgent(CustomNavMeshAgent customAgent, out HiddenNavMeshAgent hiddenAgent)
     {
-        Instance.customToHiddenAgents.TryGetValue(customAgent.gameObject, out GameObject hiddenObject);
+        GameObject hiddenObject;
+        if(Application.isPlaying)
+        {
+            Instance.PlayingCustomToHiddenAgents.TryGetValue(customAgent.gameObject, out hiddenObject);
+        }
+        else
+        {
+            Instance.CustomToHiddenAgents.TryGetValue(customAgent.gameObject, out hiddenObject);
+        }
         hiddenAgent = (hiddenObject != null) ? hiddenObject.GetComponent<HiddenNavMeshAgent>() : null;
         return hiddenAgent != null;
     }
@@ -254,7 +358,16 @@ public class CustomNavMesh : ScriptableObject
     /// <returns></returns>
     public static bool TryGetCustomAgent(HiddenNavMeshAgent hiddenAgent, out CustomNavMeshAgent customAgent)
     {
-        Instance.hiddenToCustomAgents.TryGetValue(hiddenAgent.gameObject, out GameObject customObject);
+        GameObject customObject;
+        if (Application.isPlaying)
+        {
+            Instance.PlayingHiddenToCustomAgents.TryGetValue(hiddenAgent.gameObject, out customObject);
+        }
+        else
+        {
+            Instance.HiddenToCustomAgents.TryGetValue(hiddenAgent.gameObject, out customObject);
+        }
+
         customAgent = (customObject != null) ? customObject.GetComponent<CustomNavMeshAgent>() : null;
         return customAgent != null;
     }

@@ -14,14 +14,14 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     float timeStopped;
 
     /// <summary>
-    /// Access the current velocity of the hidden agent component.
-    /// Returns Vector3.zero if it's currently in block mode. 
+    /// Access the current velocity of the hidden agent component. Returns Vector3.zero 
+    /// if it's currently in block mode or the agent is simply not moving. 
     /// </summary>
     public Vector3 Velocity
     {
         get
         {
-            if (Agent.enabled)
+            if (Agent.enabled && CustomAgent != null)
             {
                 float magnitude = Agent.velocity.magnitude;
                 if (magnitude <= CustomAgent.Speed)
@@ -214,8 +214,8 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     protected override void OnCustomUpdate()
     {
         Vector3 agentPos = CustomAgent.transform.position;
-        Vector3 translation = CustomNavMesh.HiddenTranslation;        
-        
+        Vector3 translation = CustomNavMesh.HiddenTranslation;
+
         // why not call UpdatePosition? it is slower, does unnecessary calculations
         transform.position = new Vector3(
             agentPos.x + translation.x,
