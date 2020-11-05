@@ -80,7 +80,7 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
         if (meshRenderer == null)
         {
             meshRenderer = gameObject.AddComponent<MeshRenderer>();
-            meshRenderer.sharedMaterial = CustomNavMesh.HiddenObstacleMaterial;
+            meshRenderer.sharedMaterial = OldCustomNavMesh.HiddenObstacleMaterial;
         }
 
         UpdateObstacle();
@@ -116,7 +116,7 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
             if (CustomObstacle != null)
             {
                 transform.parent = CustomObstacle.transform; // prevent from being changed
-                transform.position = CustomObstacle.transform.position + CustomNavMesh.HiddenTranslation;
+                transform.position = CustomObstacle.transform.position + OldCustomNavMesh.HiddenTranslation;
             }
 
             transform.hasChanged = false;
@@ -165,7 +165,7 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
 #if UNITY_EDITOR
             Undo.RecordObject(meshRenderer, "");
 #endif
-            meshRenderer.enabled = CustomNavMesh.RenderHidden;
+            meshRenderer.enabled = OldCustomNavMesh.RenderHidden;
         }
     }
 
@@ -176,7 +176,7 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
 #if UNITY_EDITOR
             Undo.RecordObject(transform, "");
 #endif
-            transform.position = CustomObstacle.transform.position + CustomNavMesh.HiddenTranslation;
+            transform.position = CustomObstacle.transform.position + OldCustomNavMesh.HiddenTranslation;
             transform.hasChanged = false;
         }
     }
@@ -191,8 +191,8 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
                 CustomObstacle.onSizeChange += UpdateMesh;
             }
 
-            CustomNavMesh.onRenderHiddenUpdate += UpdateVisibility;
-            CustomNavMesh.onHiddenTranslationUpdate += UpdatePosition;
+            OldCustomNavMesh.onRenderHiddenUpdate += UpdateVisibility;
+            OldCustomNavMesh.onHiddenTranslationUpdate += UpdatePosition;
 
             subscribed = true;
         }
@@ -208,8 +208,8 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
                 CustomObstacle.onSizeChange -= UpdateMesh;
             }
 
-            CustomNavMesh.onRenderHiddenUpdate -= UpdateVisibility;
-            CustomNavMesh.onHiddenTranslationUpdate -= UpdatePosition;
+            OldCustomNavMesh.onRenderHiddenUpdate -= UpdateVisibility;
+            OldCustomNavMesh.onHiddenTranslationUpdate -= UpdatePosition;
 
             subscribed = false;
         }

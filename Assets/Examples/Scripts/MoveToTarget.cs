@@ -9,7 +9,6 @@ public class MoveToTarget : MonoBehaviour
         agent = GetComponent<CustomNavMeshAgent>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if(agent != null)

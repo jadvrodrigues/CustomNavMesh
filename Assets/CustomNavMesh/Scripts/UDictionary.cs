@@ -40,10 +40,7 @@ public class UDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializatio
             Clear();
             for (int i = 0; i < length; i++)
             {
-                if(m_keys[i] != null && m_values[i] != null)
-                {
-                    this[m_keys[i]] = m_values[i];
-                }
+                this[m_keys[i]] = m_values[i];
             }
 
             m_keys = null;

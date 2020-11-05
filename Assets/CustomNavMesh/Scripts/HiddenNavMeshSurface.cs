@@ -57,7 +57,7 @@ public class HiddenNavMeshSurface : CustomMonoBehaviour
         if (meshRenderer == null)
         {
             meshRenderer = gameObject.AddComponent<MeshRenderer>();
-            meshRenderer.sharedMaterial = CustomNavMesh.HiddenSurfaceMaterial;
+            meshRenderer.sharedMaterial = OldCustomNavMesh.HiddenSurfaceMaterial;
         }
 
         UpdateMesh();
@@ -93,7 +93,7 @@ public class HiddenNavMeshSurface : CustomMonoBehaviour
             if (CustomSurface != null)
             {
                 transform.parent = CustomSurface.transform; // prevent from being changed
-                transform.position = CustomSurface.transform.position + CustomNavMesh.HiddenTranslation;
+                transform.position = CustomSurface.transform.position + OldCustomNavMesh.HiddenTranslation;
             }
 
             transform.hasChanged = false;
@@ -123,7 +123,7 @@ public class HiddenNavMeshSurface : CustomMonoBehaviour
 #if UNITY_EDITOR
             Undo.RecordObject(meshRenderer, "");
 #endif
-            meshRenderer.enabled = CustomNavMesh.RenderHidden;
+            meshRenderer.enabled = OldCustomNavMesh.RenderHidden;
         }
     }
 
@@ -134,7 +134,7 @@ public class HiddenNavMeshSurface : CustomMonoBehaviour
 #if UNITY_EDITOR
             Undo.RecordObject(transform, "");
 #endif
-            transform.position = CustomSurface.transform.position + CustomNavMesh.HiddenTranslation;
+            transform.position = CustomSurface.transform.position + OldCustomNavMesh.HiddenTranslation;
             transform.hasChanged = false;
         }
     }
@@ -145,8 +145,8 @@ public class HiddenNavMeshSurface : CustomMonoBehaviour
         {
             if(CustomSurface != null) CustomSurface.onMeshUpdate += UpdateMesh;
 
-            CustomNavMesh.onRenderHiddenUpdate += UpdateVisibility;
-            CustomNavMesh.onHiddenTranslationUpdate += UpdatePosition;
+            OldCustomNavMesh.onRenderHiddenUpdate += UpdateVisibility;
+            OldCustomNavMesh.onHiddenTranslationUpdate += UpdatePosition;
 
             subscribed = true;
         }
@@ -158,8 +158,8 @@ public class HiddenNavMeshSurface : CustomMonoBehaviour
         {
             if (CustomSurface != null) CustomSurface.onMeshUpdate -= UpdateMesh;
 
-            CustomNavMesh.onRenderHiddenUpdate -= UpdateVisibility;
-            CustomNavMesh.onHiddenTranslationUpdate -= UpdatePosition;
+            OldCustomNavMesh.onRenderHiddenUpdate -= UpdateVisibility;
+            OldCustomNavMesh.onHiddenTranslationUpdate -= UpdatePosition;
 
             subscribed = false;
         }

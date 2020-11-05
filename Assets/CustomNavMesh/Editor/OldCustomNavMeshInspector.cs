@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 
-[CustomEditor(typeof(CustomNavMesh))]
-public class CustomNavMeshInspector : Editor
+[CustomEditor(typeof(OldCustomNavMesh))]
+public class OldCustomNavMeshInspector : Editor
 {
     SerializedProperty hiddenTranslation;
     SerializedProperty renderHidden;
@@ -23,7 +23,7 @@ public class CustomNavMeshInspector : Editor
         if (EditorGUI.EndChangeCheck())
         {
             Undo.RecordObject(target, "Changed Hidden Translation");
-            CustomNavMesh.HiddenTranslation = hiddenTranslation.vector3Value;
+            OldCustomNavMesh.HiddenTranslation = hiddenTranslation.vector3Value;
         }
 
         EditorGUI.BeginChangeCheck();
@@ -31,7 +31,7 @@ public class CustomNavMeshInspector : Editor
         if (EditorGUI.EndChangeCheck())
         {
             Undo.RecordObject(target, "Changed Render Hidden");
-            CustomNavMesh.RenderHidden = renderHidden.boolValue;
+            OldCustomNavMesh.RenderHidden = renderHidden.boolValue;
         }
     }
 }

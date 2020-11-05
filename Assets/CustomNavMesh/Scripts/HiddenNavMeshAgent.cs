@@ -47,7 +47,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         {
             if (customAgent == null)
             {
-                CustomNavMesh.TryGetCustomAgent(this, out customAgent);
+                OldCustomNavMesh.TryGetCustomAgent(this, out customAgent);
             }
             return customAgent;
         }
@@ -181,7 +181,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         if (meshRenderer == null)
         {
             meshRenderer = gameObject.AddComponent<MeshRenderer>();
-            meshRenderer.sharedMaterial = CustomNavMesh.HiddenAgentMaterial;
+            meshRenderer.sharedMaterial = OldCustomNavMesh.HiddenAgentMaterial;
         }
 
         obstacle = GetComponent<NavMeshObstacle>();
@@ -214,7 +214,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     protected override void OnCustomUpdate()
     {
         Vector3 agentPos = CustomAgent.transform.position;
-        Vector3 translation = CustomNavMesh.HiddenTranslation;
+        Vector3 translation = OldCustomNavMesh.HiddenTranslation;
 
         // why not call UpdatePosition? it is slower, does unnecessary calculations
         transform.position = new Vector3(
@@ -328,7 +328,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 #if UNITY_EDITOR
             Undo.RecordObject(meshRenderer, "");
 #endif
-            meshRenderer.enabled = CustomNavMesh.RenderHidden;
+            meshRenderer.enabled = OldCustomNavMesh.RenderHidden;
         }
     }
 
@@ -350,7 +350,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 #if UNITY_EDITOR
             Undo.RecordObject(transform, "");
 #endif
-            transform.position = customAgent.transform.position + CustomNavMesh.HiddenTranslation +
+            transform.position = customAgent.transform.position + OldCustomNavMesh.HiddenTranslation +
                 (customAgent.Height / 2.0f * Mathf.Sign(customAgent.transform.localScale.y) - customAgent.BaseOffset) *
                 Vector3.up * customAgent.transform.localScale.y;
         }
@@ -412,8 +412,8 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
                 }
             }
 
-            CustomNavMesh.onRenderHiddenUpdate += UpdateVisibility;
-            CustomNavMesh.onHiddenTranslationUpdate += UpdatePosition;
+            OldCustomNavMesh.onRenderHiddenUpdate += UpdateVisibility;
+            OldCustomNavMesh.onHiddenTranslationUpdate += UpdatePosition;
 
             subscribed = true;
         }
@@ -439,8 +439,8 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
                 }
             }
 
-            CustomNavMesh.onRenderHiddenUpdate -= UpdateVisibility;
-            CustomNavMesh.onHiddenTranslationUpdate -= UpdatePosition;
+            OldCustomNavMesh.onRenderHiddenUpdate -= UpdateVisibility;
+            OldCustomNavMesh.onHiddenTranslationUpdate -= UpdatePosition;
 
             subscribed = false;
         }
