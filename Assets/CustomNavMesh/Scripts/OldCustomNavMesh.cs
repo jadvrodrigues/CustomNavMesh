@@ -8,7 +8,7 @@ using System.Collections.Generic;
 /// The NavMesh singleton class replacement for using the nav mesh.
 /// </summary>
 public class OldCustomNavMesh : ScriptableObject
-{
+{/*
     static readonly Color surfaceColor = new Color(0.5215687f, 0.5215687f, 0.5215687f); // gray
     static readonly Color agentColor = new Color(0.2509804f, 0.3764706f, 0.2509804f); // green
     static readonly Color obstacleColor = new Color(0.6235294f, 0.2509804f, 0.2509804f); // red
@@ -384,4 +384,4 @@ public class OldCustomNavMesh : ScriptableObject
     /// Serialiable game object to game object dictionary.
     /// </summary>
     [Serializable] class GameObjectDictionary : UDictionary<GameObject, GameObject> { }
-}
+*/}

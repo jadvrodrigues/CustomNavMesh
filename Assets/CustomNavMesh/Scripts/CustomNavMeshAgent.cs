@@ -297,7 +297,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         {
             if (hiddenAgent == null)
             {
-                OldCustomNavMesh.TryGetHiddenAgent(this, out hiddenAgent);
+                CustomNavMesh.TryGetHiddenAgent(this, out hiddenAgent);
             }
             return hiddenAgent;
         }
@@ -404,7 +404,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     /// <returns>True if the destination was requested successfully, otherwise false.</returns>
     public bool SetDestination(Vector3 target)
     {
-        return HiddenAgent.SetDestination(target + OldCustomNavMesh.HiddenTranslation);
+        return HiddenAgent.SetDestination(target + CustomNavMesh.HiddenTranslation);
     }
 
     /// <summary>
@@ -509,7 +509,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         hiddenObject.isStatic = gameObject.isStatic;
 #endif
             HiddenAgent = hiddenObject.AddComponent<HiddenNavMeshAgent>();
-            OldCustomNavMesh.RegisterAgent(this, HiddenAgent);
+            CustomNavMesh.RegisterAgent(this, HiddenAgent);
         }
     }
 
@@ -517,7 +517,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     {
         if (HiddenAgent != null)
         {
-            OldCustomNavMesh.UnregisterAgent(this, HiddenAgent);
+            CustomNavMesh.UnregisterAgent(this, HiddenAgent);
             DestroyImmediate(HiddenAgent.gameObject);
         }
     }
