@@ -105,10 +105,14 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             if (Application.isPlaying && isBlocking != value)
             {
                 isBlocking = value;
+                var meshRenderer = GetComponent<MeshRenderer>();
+
                 if (value)
                 {
                     agent.enabled = false;
                     obstacle.enabled = true;
+
+                    meshRenderer.sharedMaterial = CustomNavMesh.HiddenBlockingAgentMaterial;
                 }
                 else
                 {
@@ -121,6 +125,8 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
                     {
                         agent.SetDestination(destination.Value);
                     }
+
+                    meshRenderer.sharedMaterial = CustomNavMesh.HiddenAgentMaterial;
                 }
             }
         }

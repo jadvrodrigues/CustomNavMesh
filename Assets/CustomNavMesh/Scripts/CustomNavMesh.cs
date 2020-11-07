@@ -120,7 +120,7 @@ public class CustomNavMesh : MonoBehaviour
 
     Material hiddenAgentMaterial;
     /// <summary>
-    /// The material used by all of the hidden agents.
+    /// The material used by all of the hidden agents that are currently moving freely.
     /// </summary>
     public static Material HiddenAgentMaterial
     {
@@ -131,6 +131,22 @@ public class CustomNavMesh : MonoBehaviour
                 Instance.hiddenAgentMaterial = Resources.Load<Material>("Materials/HiddenAgent");
             }
             return Instance.hiddenAgentMaterial;
+        }
+    }
+
+    Material hiddenBlockingAgentMaterial;
+    /// <summary>
+    /// The material used by all of the hidden agents that are currently in block mode.
+    /// </summary>
+    public static Material HiddenBlockingAgentMaterial
+    {
+        get
+        {
+            if (Instance.hiddenBlockingAgentMaterial == null)
+            {
+                Instance.hiddenBlockingAgentMaterial = Resources.Load<Material>("Materials/HiddenBlockingAgent");
+            }
+            return Instance.hiddenBlockingAgentMaterial;
         }
     }
 
