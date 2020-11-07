@@ -251,6 +251,7 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
             HiddenObstacle.gameObject.name = "(Hidden) " + name;
             HiddenObstacle.gameObject.SetActive(true);
             HiddenObstacle.gameObject.hideFlags = HideFlags.NotEditable; // reapply hide flags after activating it
+            HiddenObstacle.enabled = true;
         }
     }
 
@@ -260,6 +261,7 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
         {
             HiddenObstacle.gameObject.name = "(Unused) " + name;
             HiddenObstacle.gameObject.SetActive(false);
+            HiddenObstacle.enabled = false;
         }
     }
 

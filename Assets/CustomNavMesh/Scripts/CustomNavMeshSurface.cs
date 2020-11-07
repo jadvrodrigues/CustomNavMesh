@@ -186,6 +186,7 @@ public class CustomNavMeshSurface : CustomMonoBehaviour
             HiddenSurface.gameObject.name = "(Hidden) " + name;
             HiddenSurface.gameObject.SetActive(true);
             HiddenSurface.gameObject.hideFlags = HideFlags.NotEditable; // reapply hide flags after activating it
+            HiddenSurface.enabled = true;
         }
     }
 
@@ -197,6 +198,7 @@ public class CustomNavMeshSurface : CustomMonoBehaviour
         {
             HiddenSurface.gameObject.name = "(Unused) " + name;
             HiddenSurface.gameObject.SetActive(false);
+            HiddenSurface.enabled = false;
         }
     }
 

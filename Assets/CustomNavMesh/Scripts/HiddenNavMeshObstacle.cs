@@ -15,7 +15,7 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
     {
         get
         {
-            if (customObstacle == null && transform.parent != null)
+            if (customObstacle == null && transform != null && transform.parent != null)
             {
                 customObstacle = transform.parent.GetComponent<CustomNavMeshObstacle>();
             }

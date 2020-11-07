@@ -18,7 +18,7 @@ Note: The system expects the navigation surfaces to be rendered meshes and not P
 
 All the new components secretly spawn an hidden duplicate version of themselves, where the agents on that hidden surface can be toggled between NavMeshAgent and NavMeshObstacle. This allows the agents that are shown to avoid each other, using the hidden ones pathing to move.
 
-You can adjust the hidden settings through script by accessing the __CustomNavMesh__ class, or through the scriptable object __Settings.asset__ located at the `Assets/CustomNavMesh/Resources` folder.
+You can adjust the hidden game objects settings by accessing the __CustomNavMesh__ class or through it's singleton present in the scene.
 
 # How To Get Started
 

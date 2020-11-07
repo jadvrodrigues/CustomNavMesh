@@ -1,7 +1,8 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-[AddComponentMenu("")] // remove from Add Component list
+[ExecuteAlways, AddComponentMenu("")] // remove from Add Component list
 public class CustomNavMesh : MonoBehaviour
 {
     // Why use a GameObject to GameObject dictionary instead of CustomNavMeshAgent to HiddenNavMeshAgent and 
@@ -29,8 +30,14 @@ public class CustomNavMesh : MonoBehaviour
             {
                 instance = (CustomNavMesh)FindObjectOfType(typeof(CustomNavMesh));
 
+                // Reset the static events to avoid them from calling methods from objects not present in the current scene
+                onHiddenTranslationUpdate = null;
+                onRenderHiddenUpdate = null;
+
                 if (instance == null)
                 {
+                    if(!SceneManager.GetActiveScene().isLoaded) return null; // null if leaving the scene
+
                     var singletonObject = new GameObject();
                     instance = singletonObject.AddComponent<CustomNavMesh>();
                     singletonObject.name = typeof(CustomNavMesh).ToString() + " (Singleton)";
@@ -176,8 +183,15 @@ public class CustomNavMesh : MonoBehaviour
     /// <returns></returns>
     public static bool TryGetHiddenAgent(CustomNavMeshAgent customAgent, out HiddenNavMeshAgent hiddenAgent)
     {
-        Instance.customToHiddenAgents.TryGetValue(customAgent.gameObject, out GameObject hiddenObject);
-        hiddenAgent = (hiddenObject != null) ? hiddenObject.GetComponent<HiddenNavMeshAgent>() : null;
+        if (Instance == null)
+        {
+            hiddenAgent = null;
+        }
+        else
+        {
+            Instance.customToHiddenAgents.TryGetValue(customAgent.gameObject, out GameObject hiddenObject);
+            hiddenAgent = (hiddenObject != null) ? hiddenObject.GetComponent<HiddenNavMeshAgent>() : null;
+        }
         return hiddenAgent != null;
     }
 
@@ -189,9 +203,37 @@ public class CustomNavMesh : MonoBehaviour
     /// <returns></returns>
     public static bool TryGetCustomAgent(HiddenNavMeshAgent hiddenAgent, out CustomNavMeshAgent customAgent)
     {
-        Instance.hiddenToCustomAgents.TryGetValue(hiddenAgent.gameObject, out GameObject customObject);
-        customAgent = (customObject != null) ? customObject.GetComponent<CustomNavMeshAgent>() : null;
+        if (Instance == null)
+        {
+            customAgent = null;
+        }
+        else
+        {
+            Instance.hiddenToCustomAgents.TryGetValue(hiddenAgent.gameObject, out GameObject customObject);
+            customAgent = (customObject != null) ? customObject.GetComponent<CustomNavMeshAgent>() : null;
+        }
         return customAgent != null;
+    }
+
+    private void OnDestroy()
+    {
+        if (Time.frameCount == 0) return; // ignore when entering and leaving play mode
+        if (!SceneManager.GetActiveScene().isLoaded) return; // ignore when changing scene
+
+        // Disable all custom components (surfaces, obstacles and agents)
+        Debug.LogWarning("CustomNavMesh singleton instance is being destroyed. Disabling all dependant components.");
+        foreach(CustomNavMeshSurface surface in FindObjectsOfType(typeof(CustomNavMeshSurface)))
+        {
+            surface.enabled = false;
+        }
+        foreach (CustomNavMeshObstacle obstacle in FindObjectsOfType(typeof(CustomNavMeshObstacle)))
+        {
+            obstacle.enabled = false;
+        }
+        foreach (CustomNavMeshAgent agent in FindObjectsOfType(typeof(CustomNavMeshAgent)))
+        {
+            agent.enabled = false;
+        }
     }
 
     /// <summary>

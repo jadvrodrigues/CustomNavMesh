@@ -14,7 +14,7 @@ public class HiddenNavMeshSurface : CustomMonoBehaviour
     {
         get
         {
-            if (customSurface == null && transform.parent != null)
+            if (customSurface == null && transform != null && transform.parent != null)
             {
                 customSurface = transform.parent.GetComponent<CustomNavMeshSurface>();
             }
@@ -70,7 +70,6 @@ public class HiddenNavMeshSurface : CustomMonoBehaviour
     protected override void OnCustomDisable()
     {
         TryUnsubscribe();
-
     }
 
     // hide Start method because this has to be triggered both inside and outside 
