@@ -24,11 +24,9 @@ public class UDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializatio
 
     void ISerializationCallbackReceiver.OnBeforeSerialize()
     {
-        if (m_keys == null)
-        { 
-            m_keys = Keys.ToList();
-            m_values = Values.ToList();
-        }
+        // if (m_keys != null) return;
+        m_keys = Keys.ToList();
+        m_values = Values.ToList();
     }
 
     void ISerializationCallbackReceiver.OnAfterDeserialize()

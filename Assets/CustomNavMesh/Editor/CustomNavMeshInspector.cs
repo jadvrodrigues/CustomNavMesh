@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEngine;
 
 [CustomEditor(typeof(CustomNavMesh))]
 public class CustomNavMeshInspector : Editor

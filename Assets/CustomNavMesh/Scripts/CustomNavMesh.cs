@@ -4,8 +4,10 @@ using UnityEngine;
 [AddComponentMenu("")] // remove from Add Component list
 public class CustomNavMesh : MonoBehaviour
 {
-    GameObjectDictionary customToHiddenAgents = new GameObjectDictionary();
-    GameObjectDictionary hiddenToCustomAgents = new GameObjectDictionary();
+    // Why use a GameObject to GameObject dictionary instead of CustomNavMeshAgent to HiddenNavMeshAgent and 
+    // vice versa? To avoid them from resetting to null and loosing the correspondence between the two.
+    [SerializeField, HideInInspector] GameObjectDictionary customToHiddenAgents = new GameObjectDictionary();
+    [SerializeField, HideInInspector] GameObjectDictionary hiddenToCustomAgents = new GameObjectDictionary();
 
     /// <summary>
     /// A delegate which can be used to register callback methods to be invoked after the 
@@ -162,7 +164,6 @@ public class CustomNavMesh : MonoBehaviour
     /// <param name="hiddenAgent">The hidden agent</param>
     public static void UnregisterAgent(CustomNavMeshAgent customAgent, HiddenNavMeshAgent hiddenAgent)
     {
-        Debug.Log("unregister");
         Instance.hiddenToCustomAgents.Remove(hiddenAgent.gameObject);
         Instance.customToHiddenAgents.Remove(customAgent.gameObject);
     }
@@ -192,21 +193,6 @@ public class CustomNavMesh : MonoBehaviour
         customAgent = (customObject != null) ? customObject.GetComponent<CustomNavMeshAgent>() : null;
         return customAgent != null;
     }
-
-    private void Start()
-    {
-        Debug.Log(Instance.customToHiddenAgents.Count);
-    }
-
-    /// <summary>
-    /// Serialiable custom agent to hidden agent dictionary.
-    /// </summary>
-    [Serializable] class CustomToHiddenAgentDictionary : UDictionary<CustomNavMeshAgent, HiddenNavMeshAgent> { }
-
-    /// <summary>
-    /// Serialiable hidden agent to custom agent dictionary.
-    /// </summary>
-    [Serializable] class HiddenToCustomAgentDictionary : UDictionary<HiddenNavMeshAgent, CustomNavMeshAgent> { }
 
     /// <summary>
     /// Serialiable game object to game object dictionary.
