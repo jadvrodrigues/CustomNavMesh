@@ -236,12 +236,14 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         {
             if(IsBlocking)
             {
-                timeBlocking += Time.deltaTime;
-
-                if (timeBlocking >= CustomAgent.BlockRefreshInterval)
+                if (destination.HasValue)
                 {
-                    timeBlocking = 0.0f;
-                    TryUnblock();
+                    timeBlocking += Time.deltaTime;
+
+                    if (timeBlocking >= CustomAgent.BlockRefreshInterval)
+                    {
+                        IsBlocking = false;
+                    }
                 }
             }
             else
@@ -265,59 +267,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         }
 
         LastPosition = transform.position;
-    }
-
-    float surfaceAgentRadius = 0.0f;
-    float SurfaceAgentRadius
-    {
-        get
-        {
-            if(surfaceAgentRadius == 0.0f)
-            {
-                surfaceAgentRadius = NavMesh.GetSettingsByID(CustomAgent.AgentTypeID).agentRadius;
-            }
-            return surfaceAgentRadius;
-        }
-    }
-
-    void TryUnblock()
-    {
-        if (destination.HasValue)
-        {
-            // The centered agent position where it touches the surface
-            Vector3 agentSurfacePos = new Vector3(
-                transform.position.x, 
-                transform.position.y - CustomAgent.Height / 2.0f * transform.localScale.y, 
-                transform.position.z);
-
-            NavMeshQueryFilter queryFilter = new NavMeshQueryFilter();
-            queryFilter.agentTypeID = customAgent.AgentTypeID;
-            queryFilter.areaMask = NavMesh.AllAreas;
-
-            // Try finding a valid position in surface around agentSurfacePos (the position itself is occupied by it's own obstacle)
-            if(NavMesh.SamplePosition(transform.position, out NavMeshHit hit, SurfaceAgentRadius * 2.5f, queryFilter))
-            {
-                NavMeshPath path = new NavMeshPath();
-
-                // Check if there's a path to the destination
-                if(NavMesh.CalculatePath(hit.position, destination.Value, queryFilter, path))
-                {
-                    // Check if destination is reachable, so the agent can leave block mode
-                    if(path.status == NavMeshPathStatus.PathComplete)
-                    {
-                        // set destination to null, so IsBlocking doesn't call SetDestination
-                        Vector3 savedDestination = destination.Value;
-                        destination = null;
-
-                        IsBlocking = false;
-
-                        destination = savedDestination;
-                        Agent.SetPath(path);
-                    }
-                }
-            
-            }
-        }
     }
 
     void UpdateAgent()
