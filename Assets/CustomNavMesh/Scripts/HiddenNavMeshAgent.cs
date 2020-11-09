@@ -11,9 +11,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     bool subscribed; // used to avoid subscribing twice
 
     Vector3? destination;
-
-    float timeStopped; // time while in agent non block mode where speed threshold isn't surpassed
-    float timeBlocking; // time in block mode since last refresh
+    float timer; // count the time since agent changed mode or block mode is refreshed
 
     /// <summary>
     /// Access the current velocity of the hidden agent component. Returns Vector3.zero 
@@ -104,33 +102,24 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         get { return isBlocking; }
         set
         {
-            if (Application.isPlaying && isBlocking != value)
+            if (Application.isPlaying)
             {
+                if (value == isBlocking) Debug.LogWarning("Attention! Redundant set!"); // TODO erase this
+
                 isBlocking = value;
-                var meshRenderer = GetComponent<MeshRenderer>();
 
                 if (value)
                 {
-                    agent.enabled = false;
-                    obstacle.enabled = true;
-
-                    timeBlocking = 0.0f;
-
-                    meshRenderer.sharedMaterial = CustomNavMesh.HiddenBlockingAgentMaterial;
+                    SwitchToObstacle();
                 }
                 else
                 {
-                    obstacle.enabled = false;
-                    agent.enabled = true;
-
-                    timeStopped = 0.0f;
+                    SwitchToAgent();
 
                     if (destination.HasValue)
                     {
                         agent.SetDestination(destination.Value);
                     }
-
-                    meshRenderer.sharedMaterial = CustomNavMesh.HiddenAgentMaterial;
                 }
             }
         }
@@ -153,9 +142,24 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         }
     }
 
+    float surfaceAgentRadius = 0.0f;
+    float SurfaceAgentRadius
+    {
+        get
+        {
+            if (surfaceAgentRadius == 0.0f)
+            {
+                surfaceAgentRadius = NavMesh.GetSettingsByID(CustomAgent.AgentTypeID).agentRadius;
+            }
+            return surfaceAgentRadius;
+        }
+    }
+
     public bool SetDestination(Vector3 target)
     {
-        IsBlocking = false;
+        isBlocking = false;
+        SwitchToAgent();
+
         destination = target;
         return agent.SetDestination(target);
     }
@@ -232,23 +236,25 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             transform.position.y,
             agentPos.z + translation.z);
 
-        if (Vector3.Distance(transform.position, LastPosition.Value) / Time.deltaTime < CustomAgent.UnblockSpeedThreshold)
+        float currentSpeed = Vector3.Distance(transform.position, LastPosition.Value) / Time.deltaTime;
+        bool surpassedSpeed = currentSpeed < CustomAgent.UnblockSpeedThreshold;
+        timer = (surpassedSpeed) ? timer + Time.deltaTime : 0.0f;
+
+        if(currentSpeed < CustomAgent.UnblockSpeedThreshold) // if it did not surpass the speed threshold
         {
+            timer += Time.deltaTime;
+
             if(IsBlocking)
             {
-                timeBlocking += Time.deltaTime;
-
-                if (timeBlocking >= CustomAgent.BlockRefreshInterval)
+                if (timer >= CustomAgent.BlockRefreshInterval)
                 {
-                    timeBlocking = 0.0f;
+                    timer = 0.0f;
                     TryUnblock();
                 }
             }
             else
             {
-                timeStopped += Time.deltaTime;
-
-                if (timeStopped >= CustomAgent.TimeToBlock)
+                if (timer >= CustomAgent.TimeToBlock)
                 {
                     IsBlocking = true;
                 }
@@ -256,7 +262,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         }
         else
         {
-            timeStopped = 0.0f;
+            timer = 0.0f;
 
             if (IsBlocking)
             {
@@ -267,17 +273,22 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         LastPosition = transform.position;
     }
 
-    float surfaceAgentRadius = 0.0f;
-    float SurfaceAgentRadius
+    void SwitchToAgent()
     {
-        get
-        {
-            if(surfaceAgentRadius == 0.0f)
-            {
-                surfaceAgentRadius = NavMesh.GetSettingsByID(CustomAgent.AgentTypeID).agentRadius;
-            }
-            return surfaceAgentRadius;
-        }
+        obstacle.enabled = false;
+        agent.enabled = true;
+
+        timer = 0.0f;
+        GetComponent<MeshRenderer>().sharedMaterial = CustomNavMesh.HiddenAgentMaterial;
+    }
+
+    void SwitchToObstacle()
+    {
+        agent.enabled = false;
+        obstacle.enabled = true;
+
+        timer = 0.0f;
+        GetComponent<MeshRenderer>().sharedMaterial = CustomNavMesh.HiddenBlockingAgentMaterial;
     }
 
     void TryUnblock()
@@ -286,8 +297,8 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         {
             // The centered agent position where it touches the surface
             Vector3 agentSurfacePos = new Vector3(
-                transform.position.x, 
-                transform.position.y - CustomAgent.Height / 2.0f * transform.localScale.y, 
+                transform.position.x,
+                transform.position.y - CustomAgent.Height / 2.0f * transform.localScale.y,
                 transform.position.z);
 
             NavMeshQueryFilter queryFilter = new NavMeshQueryFilter();
@@ -295,28 +306,53 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             queryFilter.areaMask = NavMesh.AllAreas;
 
             // Try finding a valid position in surface around agentSurfacePos (the position itself is occupied by it's own obstacle)
-            if(NavMesh.SamplePosition(transform.position, out NavMeshHit hit, SurfaceAgentRadius * 2.5f, queryFilter))
+            if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, SurfaceAgentRadius * 5f, queryFilter))
             {
+                Debug.Log("SamplePosition did not fail");
                 NavMeshPath path = new NavMeshPath();
 
-                // Check if there's a path to the destination
-                if(NavMesh.CalculatePath(hit.position, destination.Value, queryFilter, path))
+                // Try finding a valid position in surface around destination
+                if (NavMesh.SamplePosition(destination.Value, out NavMeshHit destinationHit, SurfaceAgentRadius * 5f, queryFilter))
                 {
-                    // Check if destination is reachable, so the agent can leave block mode
-                    if(path.status == NavMeshPathStatus.PathComplete)
+                    Debug.Log("Second SamplePosition did not fail");
+                    // Check if there's a path to the destination
+                    if (NavMesh.CalculatePath(hit.position, destinationHit.position, queryFilter, path))
                     {
-                        // set destination to null, so IsBlocking doesn't call SetDestination
-                        Vector3 savedDestination = destination.Value;
-                        destination = null;
-
-                        IsBlocking = false;
-
-                        destination = savedDestination;
-                        Agent.SetPath(path);
+                        Debug.Log("CalculatePath did not fail");
+                        // Check if last calculated path position is closer, so the agent can leave block mode
+                        Vector3 lastPathPos = path.corners[path.corners.Length - 1];
+                        closestPos = lastPathPos;
+                        if (Vector3.Distance(lastPathPos, destination.Value) + 0.5f /* TODO substitute magic number for a CustomNaMeshAgent new property */ < Vector3.Distance(agentSurfacePos, destination.Value))
+                        {
+                            isBlocking = false;
+                            SwitchToAgent();
+                            Agent.SetPath(path);
+                        }
+                    }
+                    else
+                    {
+                        Debug.Log("CalculatePathFailed");
                     }
                 }
-            
+                else
+                {
+                    Debug.Log("Second SamplePositionFailed");
+                }
             }
+            else
+            {
+                Debug.Log("SamplePositionFailed");
+            }
+        }
+    }
+
+    Vector3? closestPos;
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        if (closestPos.HasValue)
+        {
+            Gizmos.DrawSphere(closestPos.Value, 1f);
         }
     }
 
