@@ -502,7 +502,11 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     {
         if (gameObject.activeInHierarchy) // used to avoid destroying things twice, when gameObject is destroyed
         {
+#if UNITY_EDITOR
             Undo.DestroyObjectImmediate(NavMeshAgent);
+#else
+            DestroyImmediate(NavMeshAgent);
+#endif
         }
     }
 

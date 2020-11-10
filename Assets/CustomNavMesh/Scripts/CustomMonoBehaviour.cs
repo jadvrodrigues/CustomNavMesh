@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using UnityEditor;
+
+#if UNITY_EDITOR
 using UnityEditor.Experimental.SceneManagement;
+#endif
 
 /// <summary>
 /// Monobehaviour replacement class used to simplify some UnityMessages and 

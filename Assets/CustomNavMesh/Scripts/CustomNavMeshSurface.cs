@@ -1,5 +1,4 @@
 ﻿using UnityEditor;
-using UnityEditor.Experimental.SceneManagement;
 using UnityEngine;
 
 /// <summary>
@@ -153,7 +152,8 @@ public class CustomNavMeshSurface : CustomMonoBehaviour
         if (gameObject.activeInHierarchy) // used to avoid destroying things twice, when gameObject is destroyed
         {
 #if UNITY_EDITOR
-            if (!PrefabUtility.IsPartOfAnyPrefab(this) || PrefabStageUtility.GetCurrentPrefabStage() != null)
+            if (!PrefabUtility.IsPartOfAnyPrefab(this) ||
+                UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() != null)
             {
                 if (HiddenSurface != null)
                 {

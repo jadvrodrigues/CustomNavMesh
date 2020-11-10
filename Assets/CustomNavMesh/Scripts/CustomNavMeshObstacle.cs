@@ -1,7 +1,10 @@
 ﻿using UnityEditor;
-using UnityEditor.Experimental.SceneManagement;
 using UnityEngine;
 using UnityEngine.AI;
+
+#if UNITY_EDITOR
+using UnityEditor.Experimental.SceneManagement;
+#endif
 
 /// <summary>
 /// An obstacle for CustomNavMeshAgents to avoid.
@@ -224,9 +227,9 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
     {
         if (gameObject.activeInHierarchy) // used to avoid destroying things twice, when gameObject is destroyed
         {
+#if UNITY_EDITOR
             Undo.DestroyObjectImmediate(NavMeshObstacle);
 
-#if UNITY_EDITOR
             if (!PrefabUtility.IsPartOfAnyPrefab(this) || PrefabStageUtility.GetCurrentPrefabStage() != null)
             {
                 if (HiddenObstacle != null)
@@ -234,6 +237,8 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
                     Undo.DestroyObjectImmediate(HiddenObstacle.gameObject);
                 }
             }
+#else
+            DestroyImmediate(NavMeshObstacle);
 #endif
         }
     }
