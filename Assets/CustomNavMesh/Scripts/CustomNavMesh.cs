@@ -50,7 +50,7 @@ public class CustomNavMesh : MonoBehaviour
         }
     }
 
-    [SerializeField, HideInInspector] Vector3 hiddenTranslation;
+    [SerializeField, HideInInspector] Vector3 hiddenTranslation = new Vector3(1000.0f, 0.0f, 0.0f);
     /// <summary>
     /// The distance between the shown surface and the hidden surface where most of 
     /// the CustomNavMesh's calculations are done.
