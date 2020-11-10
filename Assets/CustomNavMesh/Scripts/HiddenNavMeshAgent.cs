@@ -332,7 +332,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
                     {
                         // Check if last calculated path position is closer, so the agent can leave block mode
                         Vector3 lastPathPos = path.corners[path.corners.Length - 1];
-                        if (Vector3.Distance(lastPathPos, destination.Value) + CustomAgent.HowMuchCloserToLeaveBlockMode < Vector3.Distance(agentSurfacePos, destination.Value))
+                        if (Vector3.Distance(lastPathPos, destination.Value) + CustomAgent.MinDistanceBoostToStopBlock < Vector3.Distance(agentSurfacePos, destination.Value))
                         {
                             isBlocking = false;
                             SwitchToAgent();

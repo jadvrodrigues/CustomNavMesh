@@ -257,16 +257,16 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_BlockRefreshInterval = value; }
     }
 
-    [SerializeField] float m_HowMuchCloserToLeaveBlockMode = 0.5f;
+    [SerializeField] float m_MinDistanceBoostToStopBlock = 0.5f;
     /// <summary>
-    /// In the block refresh (when "blocking" obstacle agent checks if it should change to a moving 
-    /// agent), this is the distance the newly calculated reacheable position must be closer to 
-    /// the destination (comparing with the current position) so it can change to agent.
+    /// In the block refresh (when "blocking" obstacle agent checks if it should change to a moving agent),
+    /// this is the minimum distance the newly calculated reacheable position must be closer to the 
+    /// destination (comparing with the current position) so it can change to agent.
     /// </summary>
-    public float HowMuchCloserToLeaveBlockMode
+    public float MinDistanceBoostToStopBlock
     {
-        get { return m_HowMuchCloserToLeaveBlockMode; }
-        set { m_HowMuchCloserToLeaveBlockMode = value; }
+        get { return m_MinDistanceBoostToStopBlock; }
+        set { m_MinDistanceBoostToStopBlock = value; }
     }
 
     [SerializeField] float m_MoveThreshold = 0.1f;
