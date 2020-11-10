@@ -27,6 +27,15 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
     /// </summary>
     public event OnSizeChange onSizeChange;
 
+    /// <summary>
+    /// A delegate which can be used to register callback methods to be invoked after the obstacle's center is changed.
+    /// </summary>
+    public delegate void OnCenterChange();
+    /// <summary>
+    /// Subscribe a function to be called after the obstacle's center is changed.
+    /// </summary>
+    public event OnCenterChange onCenterChange;
+
     [SerializeField] NavMeshObstacleShape m_Shape = NavMeshObstacleShape.Box;
     /// <summary>
     /// The shape of the obstacle.
@@ -44,7 +53,7 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
     public Vector3 Center
     {
         get { return m_Center; }
-        set { m_Center = value; NavMeshObstacle.center = value; onChange?.Invoke(); }
+        set { m_Center = value; NavMeshObstacle.center = value; onChange?.Invoke(); onCenterChange?.Invoke(); }
     }
 
     [SerializeField] Vector3 m_Size = Vector3.one;

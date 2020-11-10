@@ -43,6 +43,7 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
                 {
                     // update existing nav mesh obstacle
                     CustomNavMeshObstacle.TransferObstacleValues(CustomObstacle, obstacle);
+                    obstacle.center = Vector3.zero; // keep mesh centered
                 }
             }
             return obstacle;
@@ -116,11 +117,19 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
             if (CustomObstacle != null)
             {
                 transform.parent = CustomObstacle.transform; // prevent from being changed
-                transform.position = CustomObstacle.transform.position + CustomNavMesh.HiddenTranslation;
+
+                transform.position = CalculateCenterTranslation() + CustomObstacle.transform.position + CustomNavMesh.HiddenTranslation;
             }
 
             transform.hasChanged = false;
         }
+    }
+
+    Vector3 CalculateCenterTranslation()
+    {
+        var ctr = CustomObstacle.Center;
+        var scl = CustomObstacle.transform.localScale;
+        return new Vector3(ctr.x * scl.x, ctr.y * scl.y, ctr.z * scl.z);
     }
 
     void UpdateObstacle()
@@ -131,6 +140,7 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
             Undo.RecordObject(Obstacle, "");
 #endif
             CustomNavMeshObstacle.TransferObstacleValues(CustomObstacle, Obstacle);
+            Obstacle.center = Vector3.zero; // keep mesh centered
         }
     }
 
@@ -176,7 +186,7 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
 #if UNITY_EDITOR
             Undo.RecordObject(transform, "");
 #endif
-            transform.position = CustomObstacle.transform.position + CustomNavMesh.HiddenTranslation;
+            transform.position = CalculateCenterTranslation() + CustomObstacle.transform.position + CustomNavMesh.HiddenTranslation;
             transform.hasChanged = false;
         }
     }
@@ -189,6 +199,7 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
             {
                 CustomObstacle.onChange += UpdateObstacle;
                 CustomObstacle.onSizeChange += UpdateMesh;
+                CustomObstacle.onCenterChange += UpdatePosition;
             }
 
             CustomNavMesh.onRenderHiddenUpdate += UpdateVisibility;
@@ -206,6 +217,7 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
             {
                 CustomObstacle.onChange -= UpdateObstacle;
                 CustomObstacle.onSizeChange -= UpdateMesh;
+                CustomObstacle.onCenterChange -= UpdatePosition;
             }
 
             CustomNavMesh.onRenderHiddenUpdate -= UpdateVisibility;
