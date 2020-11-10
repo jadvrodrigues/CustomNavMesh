@@ -8,6 +8,20 @@ using UnityEngine.AI;
 [DisallowMultipleComponent, AddComponentMenu("")] // remove from Add Component list
 public class HiddenNavMeshAgent : CustomMonoBehaviour
 {
+    /// <summary>
+    /// When trying to unblock, this multiplier is applied to the agent's radius and
+    /// then the result is added to the surface's agent radius to get the maximum 
+    /// sampling distance for the current position.
+    /// </summary>
+    const float posSamplingModifier = 2.0f;
+
+    /// <summary>
+    /// When trying to unblock, this multiplier is applied to the agent's radius and
+    /// then the result is added to the surface's agent radius to get the maximum 
+    /// sampling distance for the destination position.
+    /// </summary>
+    const float destSamplingModifier = 6.0f;
+
     bool subscribed; // used to avoid subscribing twice
 
     Vector3? destination;
@@ -104,8 +118,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         {
             if (Application.isPlaying)
             {
-                if (value == isBlocking) Debug.LogWarning("Attention! Redundant set!"); // TODO erase this
-
                 isBlocking = value;
 
                 if (value)
@@ -306,53 +318,29 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             queryFilter.areaMask = NavMesh.AllAreas;
 
             // Try finding a valid position in surface around agentSurfacePos (the position itself is occupied by it's own obstacle)
-            if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, SurfaceAgentRadius * 5f, queryFilter))
+            float maxDistance = SurfaceAgentRadius + CustomAgent.Radius * posSamplingModifier;
+            if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, maxDistance, queryFilter))
             {
-                Debug.Log("SamplePosition did not fail");
                 NavMeshPath path = new NavMeshPath();
 
                 // Try finding a valid position in surface around destination
-                if (NavMesh.SamplePosition(destination.Value, out NavMeshHit destinationHit, SurfaceAgentRadius * 5f, queryFilter))
+                maxDistance = SurfaceAgentRadius + CustomAgent.Radius * destSamplingModifier;
+                if (NavMesh.SamplePosition(destination.Value, out NavMeshHit destinationHit, maxDistance, queryFilter))
                 {
-                    Debug.Log("Second SamplePosition did not fail");
                     // Check if there's a path to the destination
                     if (NavMesh.CalculatePath(hit.position, destinationHit.position, queryFilter, path))
                     {
-                        Debug.Log("CalculatePath did not fail");
                         // Check if last calculated path position is closer, so the agent can leave block mode
                         Vector3 lastPathPos = path.corners[path.corners.Length - 1];
-                        closestPos = lastPathPos;
-                        if (Vector3.Distance(lastPathPos, destination.Value) + 0.5f /* TODO substitute magic number for a CustomNaMeshAgent new property */ < Vector3.Distance(agentSurfacePos, destination.Value))
+                        if (Vector3.Distance(lastPathPos, destination.Value) + CustomAgent.HowMuchCloserToLeaveBlockMode < Vector3.Distance(agentSurfacePos, destination.Value))
                         {
                             isBlocking = false;
                             SwitchToAgent();
                             Agent.SetPath(path);
                         }
                     }
-                    else
-                    {
-                        Debug.Log("CalculatePathFailed");
-                    }
-                }
-                else
-                {
-                    Debug.Log("Second SamplePositionFailed");
                 }
             }
-            else
-            {
-                Debug.Log("SamplePositionFailed");
-            }
-        }
-    }
-
-    Vector3? closestPos;
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.yellow;
-        if (closestPos.HasValue)
-        {
-            Gizmos.DrawSphere(closestPos.Value, 1f);
         }
     }
 

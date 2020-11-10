@@ -224,7 +224,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_AutoBlock = value; }
     }
 
-    [SerializeField] float m_TimeToBlock = 2.5f;
+    [SerializeField] float m_TimeToBlock = 1.0f;
     /// <summary>
     /// Time in seconds needed for the hidden agent to switch from agent to obstacle, 
     /// assuming it hasn't surpassed the UnblockSpeedTreshold during the interval.
@@ -235,7 +235,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_TimeToBlock = value; }
     }
 
-    [SerializeField] float m_UnblockSpeedThreshold = 0.1f;
+    [SerializeField] float m_UnblockSpeedThreshold = 1.0f;
     /// <summary>
     /// Speed at which the hidden agent turns into an agent again if it is currently 
     /// in obstacle mode.
@@ -255,6 +255,18 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     {
         get { return m_BlockRefreshInterval; }
         set { m_BlockRefreshInterval = value; }
+    }
+
+    [SerializeField] float m_HowMuchCloserToLeaveBlockMode = 0.5f;
+    /// <summary>
+    /// In the block refresh (when "blocking" obstacle agent checks if it should change to a moving 
+    /// agent), this is the distance the newly calculated reacheable position must be closer to 
+    /// the destination (comparing with the current position) so it can change to agent.
+    /// </summary>
+    public float HowMuchCloserToLeaveBlockMode
+    {
+        get { return m_HowMuchCloserToLeaveBlockMode; }
+        set { m_HowMuchCloserToLeaveBlockMode = value; }
     }
 
     [SerializeField] float m_MoveThreshold = 0.1f;

@@ -187,8 +187,11 @@ public class CustomNavMesh : MonoBehaviour
     /// <param name="hiddenAgent">The hidden agent</param>
     public static void UnregisterAgent(CustomNavMeshAgent customAgent, HiddenNavMeshAgent hiddenAgent)
     {
-        Instance.hiddenToCustomAgents.Remove(hiddenAgent.gameObject);
-        Instance.customToHiddenAgents.Remove(customAgent.gameObject);
+        if(Instance != null)
+        {
+            Instance.hiddenToCustomAgents.Remove(hiddenAgent.gameObject);
+            Instance.customToHiddenAgents.Remove(customAgent.gameObject);
+        }
     }
 
     /// <summary>

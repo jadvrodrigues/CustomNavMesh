@@ -29,6 +29,7 @@ public class CustomNavMeshAgentInspector : Editor
     SerializedProperty m_TimeToBlock;
     SerializedProperty m_UnblockSpeedThreshold;
     SerializedProperty m_BlockRefreshInterval;
+    SerializedProperty m_HowMuchCloserToLeaveBlockMode;
     SerializedProperty m_CarvingMoveThreshold;
     SerializedProperty m_TimeToStationary;
     SerializedProperty m_CarveOnlyStationary;
@@ -72,6 +73,7 @@ public class CustomNavMeshAgentInspector : Editor
         m_TimeToBlock = serializedObject.FindProperty("m_TimeToBlock");
         m_UnblockSpeedThreshold = serializedObject.FindProperty("m_UnblockSpeedThreshold");
         m_BlockRefreshInterval = serializedObject.FindProperty("m_BlockRefreshInterval");
+        m_HowMuchCloserToLeaveBlockMode = serializedObject.FindProperty("m_HowMuchCloserToLeaveBlockMode");
         m_CarvingMoveThreshold = serializedObject.FindProperty("m_MoveThreshold");
         m_TimeToStationary = serializedObject.FindProperty("m_TimeToStationary");
         m_CarveOnlyStationary = serializedObject.FindProperty("m_CarveOnlyStationary");
@@ -260,7 +262,7 @@ public class CustomNavMeshAgentInspector : Editor
                 compressedMask = compressedMask | (1 << i);
         }
 
-        //TODO: Refactor this to use the mask field that takes a label.
+        //Refactor this to use the mask field that takes a label.
         float kSingleLineHeight = 18f;
         float kSpacing = 5;
         float kLabelFloatMinW = EditorGUIUtility.labelWidth + EditorGUIUtility.fieldWidth + kSpacing;
@@ -346,6 +348,19 @@ public class CustomNavMeshAgentInspector : Editor
 
                 if (m_BlockRefreshInterval.floatValue < 0.0f) m_BlockRefreshInterval.floatValue = 0.0f;
                 agent.BlockRefreshInterval = m_BlockRefreshInterval.floatValue;
+
+                serializedObject.ApplyModifiedProperties();
+            }
+
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(m_HowMuchCloserToLeaveBlockMode);
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(target, "Changed Agent How Much Closer To Leave Block Mode");
+                Undo.RecordObject(navMeshAgent, "");
+
+                if (m_HowMuchCloserToLeaveBlockMode.floatValue < 0.0f) m_HowMuchCloserToLeaveBlockMode.floatValue = 0.0f;
+                agent.HowMuchCloserToLeaveBlockMode = m_HowMuchCloserToLeaveBlockMode.floatValue;
 
                 serializedObject.ApplyModifiedProperties();
             }
