@@ -212,6 +212,14 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_AvoidancePriority = value; NavMeshAgent.avoidancePriority = value; onChange?.Invoke(); }
     }
 
+    /// <summary>
+    /// Property to get the current path in the hidden agent.
+    /// </summary>
+    public NavMeshPath Path
+    {
+        get { return HiddenAgent.Path; }
+    }
+
     /// </summary>
     [SerializeField] bool m_AutoBlock = true;
     /// <summary>

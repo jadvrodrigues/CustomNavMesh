@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.Collections;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -51,6 +52,14 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             {
                 return Vector3.zero;
             }
+        }
+    }
+
+    public NavMeshPath Path
+    {
+        get
+        {
+            return (Agent.enabled) ? Agent.path : null;
         }
     }
 
@@ -118,8 +127,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         {
             if (Application.isPlaying)
             {
-                isBlocking = value;
-
                 if (value)
                 {
                     SwitchToObstacle();
@@ -169,7 +176,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 
     public bool SetDestination(Vector3 target)
     {
-        isBlocking = false;
         SwitchToAgent();
 
         destination = target;
@@ -249,8 +255,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             agentPos.z + translation.z);
 
         float currentSpeed = Vector3.Distance(transform.position, LastPosition.Value) / Time.deltaTime;
-        bool surpassedSpeed = currentSpeed < CustomAgent.UnblockSpeedThreshold;
-        timer = (surpassedSpeed) ? timer + Time.deltaTime : 0.0f;
 
         if(currentSpeed < CustomAgent.UnblockSpeedThreshold) // if it did not surpass the speed threshold
         {
@@ -287,6 +291,8 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 
     void SwitchToAgent()
     {
+        isBlocking = false;
+
         obstacle.enabled = false;
         agent.enabled = true;
 
@@ -296,6 +302,8 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 
     void SwitchToObstacle()
     {
+        isBlocking = true;
+
         agent.enabled = false;
         obstacle.enabled = true;
 
@@ -334,7 +342,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
                         Vector3 lastPathPos = path.corners[path.corners.Length - 1];
                         if (Vector3.Distance(lastPathPos, destination.Value) + CustomAgent.MinDistanceBoostToStopBlock < Vector3.Distance(agentSurfacePos, destination.Value))
                         {
-                            isBlocking = false;
                             SwitchToAgent();
                             Agent.SetPath(path);
                         }

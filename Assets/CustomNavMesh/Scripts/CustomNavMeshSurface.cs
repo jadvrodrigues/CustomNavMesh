@@ -175,6 +175,9 @@ public class CustomNavMeshSurface : CustomMonoBehaviour
 #if UNITY_EDITOR
             var staticFlags = GameObjectUtility.GetStaticEditorFlags(gameObject);
             GameObjectUtility.SetStaticEditorFlags(hiddenObject, staticFlags);
+
+            var navMeshArea = GameObjectUtility.GetNavMeshArea(gameObject);
+            GameObjectUtility.SetNavMeshArea(hiddenObject, navMeshArea);
 #else
         hiddenObject.isStatic = gameObject.isStatic;
 #endif
