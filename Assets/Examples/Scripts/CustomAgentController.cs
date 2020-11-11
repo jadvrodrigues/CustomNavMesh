@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 
 [RequireComponent(typeof(CustomNavMeshAgent))]
 public class CustomAgentController : MonoBehaviour

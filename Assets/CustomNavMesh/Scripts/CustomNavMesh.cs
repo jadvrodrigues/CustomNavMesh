@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.SceneManagement;
 
 [ExecuteAlways, AddComponentMenu("")] // remove from Add Component list
@@ -164,6 +165,21 @@ public class CustomNavMesh : MonoBehaviour
             }
             return Instance.hiddenObstacleMaterial;
         }
+    }
+
+    /// <summary>
+    /// Finds the closest point on NavMesh within specified range.
+    /// </summary>
+    /// <param name="sourcePosition">The origin of the sample query.</param>
+    /// <param name="hit">Holds the properties of the resulting location.</param>
+    /// <param name="maxDistance">Sample within this distance from sourcePosition.</param>
+    /// <param name="areaMask">A mask specifying which NavMesh areas are allowed when finding the nearest point.</param>
+    /// <returns>True if a nearest point is found.</returns>
+    public static bool SamplePosition(Vector3 sourcePosition, out NavMeshHit hit, float maxDistance, int areaMask)
+    {
+        var result = NavMesh.SamplePosition(sourcePosition + HiddenTranslation, out hit, maxDistance, areaMask);
+        hit.position -= HiddenTranslation;
+        return result;
     }
 
     /// <summary>
