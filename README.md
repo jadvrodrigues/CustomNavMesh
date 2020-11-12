@@ -9,7 +9,7 @@ __How do the agents avoid others?__ The Unity's __NavMeshAgent__ only goes aroun
 <p float="left">
   <img src="Assets/GIFs/1_before.gif" width="300"/>
   <img src="Assets/GIFs/1_after.gif" width="300"/> 
-  <p>Set destination to blue target. <b>Unity's NavMeshAgent</b> on the left, and <b>CustomNavMeshAgent</b> on the right.</p>
+  <p><i>1) <b>Set destination</b> to blue target. <b>Unity's NavMeshAgent</b> on the left, and <b>CustomNavMeshAgent</b> on the right.</i></p>
 </p>
 
 __What if a moving agent collides against a stopped agent that's currently in obstacle mode?__ Normally, it wouldn't push the agent in the obstacle mode. However, if you:
