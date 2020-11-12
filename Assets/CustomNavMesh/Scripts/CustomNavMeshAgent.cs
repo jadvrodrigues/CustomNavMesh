@@ -212,14 +212,6 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_AvoidancePriority = value; NavMeshAgent.avoidancePriority = value; onChange?.Invoke(); }
     }
 
-    /// <summary>
-    /// Property to get the current path in the hidden agent.
-    /// </summary>
-    public NavMeshPath Path
-    {
-        get { return HiddenAgent.Path; }
-    }
-
     /// </summary>
     [SerializeField] bool m_AutoBlock = true;
     /// <summary>
@@ -415,6 +407,35 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         {
             savedScale = value;
         }
+    }
+
+    /// <summary>
+    /// Apply relative movement to current position.
+    /// If the agent has a path it will be adjusted.
+    /// </summary>
+    /// <param name="offset">The relative movement vector.</param>
+    public void Move(Vector3 offset)
+    {
+        NavMeshAgent.Move(offset);
+    }
+
+    /// <summary>
+    /// Clears the current path. When the path is cleared, the agent will 
+    /// not start looking for a new path until SetDestination is called.
+    /// </summary>
+    public void ResetPath()
+    {
+        HiddenAgent.ResetPath();
+    }
+
+    /// <summary>
+    /// Warps agent to the provided position.
+    /// </summary>
+    /// <param name="newPosition">New position to warp the agent to.</param>
+    /// <returns>True if agent is successfully warped, otherwise false.</returns>
+    public bool Warp(Vector3 newPosition)
+    {
+        return NavMeshAgent.Warp(newPosition);
     }
 
     /// <summary>

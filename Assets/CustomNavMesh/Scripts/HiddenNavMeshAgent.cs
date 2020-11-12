@@ -55,14 +55,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         }
     }
 
-    public NavMeshPath Path
-    {
-        get
-        {
-            return (Agent.enabled) ? Agent.path : null;
-        }
-    }
-
     CustomNavMeshAgent customAgent;
     CustomNavMeshAgent CustomAgent
     {
@@ -180,6 +172,19 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 
         destination = target;
         return agent.SetDestination(target);
+    }
+
+    /// <summary>
+    /// Clears current path and sets destination to null, which means that this agent 
+    /// will not start looking for a new path until SetDestination is called.
+    /// </summary>
+    public void ResetPath()
+    {
+        destination = null;
+        if (Agent.enabled)
+        {
+            Agent.ResetPath();
+        }
     }
 
     /// <summary>
