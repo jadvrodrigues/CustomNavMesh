@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [RequireComponent(typeof(CustomNavMeshAgent))]
-public class MoveToTarget : MonoBehaviour
+public class MoveCustomAgentToTarget : MonoBehaviour
 {
     CustomNavMeshAgent agent;
     Transform target;
