@@ -168,16 +168,36 @@ public class CustomNavMesh : MonoBehaviour
     }
 
     /// <summary>
+    /// Same as NavMesh.SamplePosition but all the calculations are done in the hidden surface. 
     /// Finds the closest point on NavMesh within specified range.
     /// </summary>
     /// <param name="sourcePosition">The origin of the sample query.</param>
     /// <param name="hit">Holds the properties of the resulting location.</param>
     /// <param name="maxDistance">Sample within this distance from sourcePosition.</param>
-    /// <param name="areaMask">A mask specifying which NavMesh areas are allowed when finding the nearest point.</param>
+    /// <param name="areaMask">A mask specifying which NavMesh areas are allowed when finding 
+    /// the nearest point.</param>
     /// <returns>True if a nearest point is found.</returns>
     public static bool SamplePosition(Vector3 sourcePosition, out NavMeshHit hit, float maxDistance, int areaMask)
     {
         var result = NavMesh.SamplePosition(sourcePosition + HiddenTranslation, out hit, maxDistance, areaMask);
+        hit.position -= HiddenTranslation;
+        return result;
+    }
+
+    /// <summary>
+    /// Same as NavMesh.Raycast but all the calculations are done in the hidden surface. 
+    /// Trace a line between two points on the NavMesh.
+    /// </summary>
+    /// <param name="sourcePosition">The origin of the ray.</param>
+    /// <param name="targetPosition">The end of the ray.</param>
+    /// <param name="hit">Holds the properties of the ray cast resulting location.</param>
+    /// <param name="areaMask">A bitfield mask specifying which NavMesh areas can be passed when tracing the ray.</param>
+    /// <returns></returns>
+    public static bool Raycast(Vector3 sourcePosition, Vector3 targetPosition, out NavMeshHit hit, int areaMask)
+    {
+        var hiddenSource = sourcePosition + HiddenTranslation;
+        var hiddenTarget = targetPosition + HiddenTranslation;
+        var result = NavMesh.Raycast(hiddenSource, hiddenTarget, out hit, areaMask);
         hit.position -= HiddenTranslation;
         return result;
     }
