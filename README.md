@@ -7,8 +7,9 @@ Alternative to Unity's NavMesh system where the __agents avoid the other non mov
 __How do the agents avoid others?__ The Unity's __NavMeshAgent__ only goes around __NavMeshObstacles__ and ignores the other agents in their path. By disabling __NavMeshAgent__ and enabling __NavMeshObstacle__ when an agent is not moving noticeably, the agents now avoid other non moving agents in their pathing.
 
 <p float="left">
-  <img src="Assets/GIFs/1_after.gif" width="256" />
-  <img src="Assets/GIFs/1_before.gif" width="256" /> 
+  <img src="Assets/GIFs/1_before.gif" width="300"/>
+  <img src="Assets/GIFs/1_after.gif" width="300"/> 
+  <p>Set destination to blue target. <b>Unity's NavMeshAgent</b> on the left, and <b>CustomNavMeshAgent</b> on the right.</p>
 </p>
 
 __What if a moving agent collides against a stopped agent that's currently in obstacle mode?__ Normally, it wouldn't push the agent in the obstacle mode. However, if you:
