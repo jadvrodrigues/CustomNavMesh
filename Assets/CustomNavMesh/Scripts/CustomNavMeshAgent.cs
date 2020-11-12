@@ -1,6 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Custom navigation mesh agent.
@@ -210,18 +211,6 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     {
         get { return m_AvoidancePriority; }
         set { m_AvoidancePriority = value; NavMeshAgent.avoidancePriority = value; onChange?.Invoke(); }
-    }
-
-    /// </summary>
-    [SerializeField] bool m_AutoBlock = true;
-    /// <summary>
-    /// Should the hidden agent turn into an obstacle when this agent hasn't moved much
-    /// so the other agents can avoid it in their paths?
-    /// </summary>
-    public bool AutoBlock
-    {
-        get { return m_AutoBlock; }
-        set { m_AutoBlock = value; }
     }
 
     [SerializeField] float m_TimeToBlock = 1.0f;
@@ -563,7 +552,19 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         if (HiddenAgent != null)
         {
             CustomNavMesh.UnregisterAgent(this, HiddenAgent);
-            DestroyImmediate(HiddenAgent.gameObject);
+            if(Application.isPlaying)
+            {
+                Destroy(HiddenAgent.gameObject);
+            }
+            else
+            {
+                // avoid "Cannot destroy GameObject while it's parent is being activated or deactivated" when leaving scene
+                if (SceneManager.GetActiveScene().isLoaded)
+                {
+                    DestroyImmediate(HiddenAgent.gameObject);
+                }
+            }
+            
         }
     }
 }

@@ -25,7 +25,6 @@ public class CustomNavMeshAgentInspector : Editor
     SerializedProperty m_ObstacleAvoidanceType;
     SerializedProperty m_AvoidancePriority;
 
-    SerializedProperty m_AutoBlock;
     SerializedProperty m_TimeToBlock;
     SerializedProperty m_UnblockSpeedThreshold;
     SerializedProperty m_BlockRefreshInterval;
@@ -69,7 +68,6 @@ public class CustomNavMeshAgentInspector : Editor
         m_ObstacleAvoidanceType = serializedObject.FindProperty("m_ObstacleAvoidanceType");
         m_AvoidancePriority = serializedObject.FindProperty("m_AvoidancePriority");
 
-        m_AutoBlock = serializedObject.FindProperty("m_AutoBlock");
         m_TimeToBlock = serializedObject.FindProperty("m_TimeToBlock");
         m_UnblockSpeedThreshold = serializedObject.FindProperty("m_UnblockSpeedThreshold");
         m_BlockRefreshInterval = serializedObject.FindProperty("m_BlockRefreshInterval");
@@ -307,133 +305,129 @@ public class CustomNavMeshAgentInspector : Editor
 
         EditorGUILayout.Space();
         EditorGUILayout.LabelField(s_Styles.m_AgentPathBlockingHeader, EditorStyles.boldLabel);
-        EditorGUILayout.PropertyField(m_AutoBlock);
 
-        if (m_AutoBlock.boolValue)
+        EditorGUI.indentLevel++;
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(
+            m_TimeToBlock, 
+            new GUIContent("Time to Block", 
+            "Time in seconds needed for the hidden agent to switch from agent to obstacle, " +
+            "assuming it hasn't surpassed the UnblockSpeedTreshold during the interval.")
+            );
+
+        if (EditorGUI.EndChangeCheck())
         {
-            EditorGUI.indentLevel++;
+            Undo.RecordObject(target, "Changed Agent Time To Block");
+            Undo.RecordObject(navMeshAgent, "");
 
-            EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(
-                m_TimeToBlock, 
-                new GUIContent("Time to Block", 
-                "Time in seconds needed for the hidden agent to switch from agent to obstacle, " +
-                "assuming it hasn't surpassed the UnblockSpeedTreshold during the interval.")
-                );
+            if (m_TimeToBlock.floatValue < 0.0f) m_TimeToBlock.floatValue = 0.0f;
+            agent.TimeToBlock = m_TimeToBlock.floatValue;
 
-            if (EditorGUI.EndChangeCheck())
-            {
-                Undo.RecordObject(target, "Changed Agent Time To Block");
-                Undo.RecordObject(navMeshAgent, "");
-
-                if (m_TimeToBlock.floatValue < 0.0f) m_TimeToBlock.floatValue = 0.0f;
-                agent.TimeToBlock = m_TimeToBlock.floatValue;
-
-                serializedObject.ApplyModifiedProperties();
-            }
-
-            EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(
-                m_UnblockSpeedThreshold,
-                new GUIContent("Unblock Speed Threshold",
-                "Speed at which the hidden agent turns into an agent again " +
-                "if it is currently in obstacle mode.")
-                );
-            if (EditorGUI.EndChangeCheck())
-            {
-                Undo.RecordObject(target, "Changed Agent Unblock Speed Threshold");
-                Undo.RecordObject(navMeshAgent, "");
-
-                if (m_UnblockSpeedThreshold.floatValue < 0.0f) m_UnblockSpeedThreshold.floatValue = 0.0f;
-                agent.UnblockSpeedThreshold = m_UnblockSpeedThreshold.floatValue;
-
-                serializedObject.ApplyModifiedProperties();
-            }
-
-            EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(
-                m_BlockRefreshInterval,
-                new GUIContent("Block Refresh Interval",
-                "Time in seconds needed for the hidden agent to check if it should change " +
-                "to agent again, assuming it is currently in obstacle mode.")
-                );
-            if (EditorGUI.EndChangeCheck())
-            {
-                Undo.RecordObject(target, "Changed Agent Block Refresh Interval");
-                Undo.RecordObject(navMeshAgent, "");
-
-                if (m_BlockRefreshInterval.floatValue < 0.0f) m_BlockRefreshInterval.floatValue = 0.0f;
-                agent.BlockRefreshInterval = m_BlockRefreshInterval.floatValue;
-
-                serializedObject.ApplyModifiedProperties();
-            }
-
-            EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(
-                m_MinDistanceBoostToStopBlock,
-                new GUIContent("Min Distance Boost to Stop Block",
-                "In the block refresh (when \"blocking\" obstacle agent checks if it should change to a moving " +
-                "agent), this is the minimum distance the newly calculated reacheable position must be closer " +
-                "to the destination (comparing with the current position) so it can change to agent.")
-                );
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                Undo.RecordObject(target, "Changed Agent How Much Closer To Leave Block Mode");
-                Undo.RecordObject(navMeshAgent, "");
-
-                if (m_MinDistanceBoostToStopBlock.floatValue < 0.0f) m_MinDistanceBoostToStopBlock.floatValue = 0.0f;
-                agent.MinDistanceBoostToStopBlock = m_MinDistanceBoostToStopBlock.floatValue;
-
-                serializedObject.ApplyModifiedProperties();
-            }
-
-            EditorGUI.indentLevel--;
-
-            EditorGUILayout.LabelField("Obstacle Carving");
-            EditorGUI.indentLevel++;
-
-            EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(m_CarvingMoveThreshold);
-            if (EditorGUI.EndChangeCheck())
-            {
-                Undo.RecordObject(target, "Changed Agent Carving Move Threshold");
-                Undo.RecordObject(navMeshAgent, "");
-
-                if (m_CarvingMoveThreshold.floatValue < 0.0f) m_CarvingMoveThreshold.floatValue = 0.0f;
-                agent.CarvingMoveThreshold = m_CarvingMoveThreshold.floatValue;
-
-                serializedObject.ApplyModifiedProperties();
-            }
-
-            EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(m_TimeToStationary);
-            if (EditorGUI.EndChangeCheck())
-            {
-                Undo.RecordObject(target, "Changed Agent Carving Time To Stationary");
-                Undo.RecordObject(navMeshAgent, "");
-
-                if (m_TimeToStationary.floatValue < 0.0f) m_TimeToStationary.floatValue = 0.0f;
-                agent.CarvingTimeToStationary = m_TimeToStationary.floatValue;
-
-                serializedObject.ApplyModifiedProperties();
-            }
-
-            EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(m_CarveOnlyStationary);
-            if (EditorGUI.EndChangeCheck())
-            {
-                Undo.RecordObject(target, "Changed Agent Carve Only Stationary");
-                Undo.RecordObject(navMeshAgent, "");
-
-                agent.CarveOnlyStationary = m_CarveOnlyStationary.boolValue;
-
-                serializedObject.ApplyModifiedProperties();
-            }
-
-
-            EditorGUI.indentLevel--;
+            serializedObject.ApplyModifiedProperties();
         }
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(
+            m_UnblockSpeedThreshold,
+            new GUIContent("Unblock Speed Threshold",
+            "Speed at which the hidden agent turns into an agent again " +
+            "if it is currently in obstacle mode.")
+            );
+        if (EditorGUI.EndChangeCheck())
+        {
+            Undo.RecordObject(target, "Changed Agent Unblock Speed Threshold");
+            Undo.RecordObject(navMeshAgent, "");
+
+            if (m_UnblockSpeedThreshold.floatValue < 0.0f) m_UnblockSpeedThreshold.floatValue = 0.0f;
+            agent.UnblockSpeedThreshold = m_UnblockSpeedThreshold.floatValue;
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(
+            m_BlockRefreshInterval,
+            new GUIContent("Block Refresh Interval",
+            "Time in seconds needed for the hidden agent to check if it should change " +
+            "to agent again, assuming it is currently in obstacle mode.")
+            );
+        if (EditorGUI.EndChangeCheck())
+        {
+            Undo.RecordObject(target, "Changed Agent Block Refresh Interval");
+            Undo.RecordObject(navMeshAgent, "");
+
+            if (m_BlockRefreshInterval.floatValue < 0.0f) m_BlockRefreshInterval.floatValue = 0.0f;
+            agent.BlockRefreshInterval = m_BlockRefreshInterval.floatValue;
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(
+            m_MinDistanceBoostToStopBlock,
+            new GUIContent("Min Distance Boost to Stop Block",
+            "In the block refresh (when \"blocking\" obstacle agent checks if it should change to a moving " +
+            "agent), this is the minimum distance the newly calculated reacheable position must be closer " +
+            "to the destination (comparing with the current position) so it can change to agent.")
+            );
+
+        if (EditorGUI.EndChangeCheck())
+        {
+            Undo.RecordObject(target, "Changed Agent How Much Closer To Leave Block Mode");
+            Undo.RecordObject(navMeshAgent, "");
+
+            if (m_MinDistanceBoostToStopBlock.floatValue < 0.0f) m_MinDistanceBoostToStopBlock.floatValue = 0.0f;
+            agent.MinDistanceBoostToStopBlock = m_MinDistanceBoostToStopBlock.floatValue;
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        EditorGUI.indentLevel--;
+
+        EditorGUILayout.LabelField("Obstacle Carving");
+        EditorGUI.indentLevel++;
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(m_CarvingMoveThreshold);
+        if (EditorGUI.EndChangeCheck())
+        {
+            Undo.RecordObject(target, "Changed Agent Carving Move Threshold");
+            Undo.RecordObject(navMeshAgent, "");
+
+            if (m_CarvingMoveThreshold.floatValue < 0.0f) m_CarvingMoveThreshold.floatValue = 0.0f;
+            agent.CarvingMoveThreshold = m_CarvingMoveThreshold.floatValue;
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(m_TimeToStationary);
+        if (EditorGUI.EndChangeCheck())
+        {
+            Undo.RecordObject(target, "Changed Agent Carving Time To Stationary");
+            Undo.RecordObject(navMeshAgent, "");
+
+            if (m_TimeToStationary.floatValue < 0.0f) m_TimeToStationary.floatValue = 0.0f;
+            agent.CarvingTimeToStationary = m_TimeToStationary.floatValue;
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(m_CarveOnlyStationary);
+        if (EditorGUI.EndChangeCheck())
+        {
+            Undo.RecordObject(target, "Changed Agent Carve Only Stationary");
+            Undo.RecordObject(navMeshAgent, "");
+
+            agent.CarveOnlyStationary = m_CarveOnlyStationary.boolValue;
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+
+        EditorGUI.indentLevel--;
 
         serializedObject.ApplyModifiedProperties();
     }
