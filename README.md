@@ -25,7 +25,7 @@ You can have them push the others. That's what this __CustomNavMesh__ system doe
   <img src="Assets/GIFs/2_after.gif" width="350"/> 
 </p>
 
->__2. Overlapping__ agents by throwing one against the others. The __agents__ are red and the __obstacles__ blue. __Unity's NavMeshAgent__ against agents that switched to __NavMeshObstacle__ on the __left__, and __CustomNavMeshAgents__ on the __right__. Note that the __avoidance radius overlapping__ is moving the standing agents and not external forces.
+>__2. Overlapping__ agents by throwing one against the others. The __agents__ are red and the __obstacles__ blue. __Unity's NavMeshAgent__ against agents that switched to __NavMeshObstacle__ on the __left__, and __CustomNavMeshAgents__ on the __right__. This is __just a showcase__, if you're trying to do something similar you should use __colliders__ and __physics__ instead since this system is simply used to __resolve agent overlap__.
 
 Instead of doing this, why not just switch the obstacle to agent? That wouldn't work because that switch isn't instant, it takes at least two frames.
 
@@ -35,7 +35,7 @@ __What are the disadvantages?__ Well, every nav mesh component is duplicated, wh
   <img src="Assets/GIFs/3_navigation_view.gif" width="700"/>
 </p> 
 
->__3.__ The duplicated __NavMesh__ components.
+>__3.__ The duplicated __NavMesh__ components. The __hidden__ components are on the __right__ side.
 
 # Custom classes
 
