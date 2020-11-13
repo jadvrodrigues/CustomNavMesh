@@ -9,8 +9,9 @@ __How do the agents avoid others?__ The Unity's __NavMeshAgent__ only goes aroun
 <p float="left">
   <img src="Assets/GIFs/1_before.gif" width="300"/>
   <img src="Assets/GIFs/1_after.gif" width="300"/> 
-  <p><i>1) <b>Set destination</b> to blue target. <b>Unity's NavMeshAgent</b> on the left, and <b>CustomNavMeshAgent</b> on the right.</i></p>
 </p>
+
+>__1. Set destination__ to blue target. __Unity's NavMeshAgent__ on the __left__, and __CustomNavMeshAgent__ on the __right__.
 
 __What if a moving agent collides against a stopped agent that's currently in obstacle mode?__ Normally, it wouldn't push the agent in the obstacle mode. However, if you:
 * duplicate the baked surface, obstacle and agents
@@ -19,17 +20,32 @@ __What if a moving agent collides against a stopped agent that's currently in ob
 
 You can have them push the others. That's what this __CustomNavMesh__ system does "under the hood", you just have to use it's custom components, which are identical to the original ones, making the transition seamless.
 
-(GIF: 2_push_stopped_agents) Left:before Right:after
+<p float="left">
+  <img src="Assets/GIFs/2_before.gif" width="300"/>
+  <img src="Assets/GIFs/2_after.gif" width="300"/> 
+</p>
+
+>__2. Overlapping__ agents by throwing one against the others. The __agents__ are red and the __obstacles__ blue. __Unity's NavMeshAgent__ against agents that switched to __NavMeshObstacle__ on the __left__, and __CustomNavMeshAgents__ on the __right__. Note that the __avoidance radius overlapping__ is moving the standing agents and not external forces.
 
 Instead of doing this, why not just switch the obstacle to agent? That wouldn't work because that switch isn't instant, it takes at least two frames.
 
-__What are the disadvantages?__ Well, every nav mesh component is duplicated, which makes it less performant. Shouldn't make a different unless you have a lot of agents. 
+__What are the disadvantages?__ Well, every nav mesh component is duplicated, which makes it less performant. Shouldn't make a different unless you have a lot of agents.
+
+<p float="left">
+  <img src="Assets/GIFs/3_navigation_view.gif" width="300"/>
+</p> 
+
+>__3.__ The duplicated __NavMesh__ components.
 
 # Custom classes
 
 __CustomNavMesh__ – you can choose the hidden game objects __relative position__ and whether or not they are __rendered__ by accessing the __class__ or through it's __singleton__ present in the __scene__.
 
-(GIF: manipulating the CustomNavMesh fields)
+<p float="left">
+  <img src="Assets/GIFs/4_custom_nav_mesh_fields.gif" width="300"/>
+</p> 
+
+>__4.__ Changing __CustomNavMesh__ fields.
 
 * __CustomNavMeshSurface__ – add to each surface that is going to be baked. The __surfaces__ need to be __rendered meshes__ and not __Physics Colliders__ or __Terrains__.
 * __CustomNavMeshObstacle__ – replacement for __NavMeshObstacle__.
@@ -45,7 +61,7 @@ __CustomNavMesh__ – you can choose the hidden game objects __relative position
 Clone or download this repository and open the project in Unity.
 Alternatively, you can copy the contents of `Assets/CustomNavMesh` to an existing project.
 
-The scenes used for the GIFs are available in the `Assets/Examples` folder. Just hit the Space Bar in play mode to test it.
+The scenes used for some of the GIFs are available in the `Assets/Examples` folder. Just hit the Space Bar in play mode to test it.
 
 Note: This project was created using __Unity 2019.4 LTS__ version. Tested in __PC Standalone__, __Android__ and __WebGL__.
 
