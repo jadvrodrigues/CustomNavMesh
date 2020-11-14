@@ -227,11 +227,11 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             obstacle = gameObject.AddComponent<NavMeshObstacle>();
             obstacle.carving = true;
         }
-        obstacle.enabled = false;
 
         agent = GetComponent<NavMeshAgent>();
         if (agent == null)
         {
+            obstacle.enabled = false;
             agent = gameObject.AddComponent<NavMeshAgent>();
         }
     }

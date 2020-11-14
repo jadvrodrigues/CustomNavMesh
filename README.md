@@ -7,8 +7,8 @@ Alternative to Unity's NavMesh system where the __agents avoid the other non mov
 __How do the agents avoid others?__ The Unity's __NavMeshAgent__ only goes around __NavMeshObstacles__ and ignores the other agents in their path. By disabling __NavMeshAgent__ and enabling __NavMeshObstacle__ when an agent is not moving noticeably, the agents now avoid other non moving agents in their pathing.
 
 <p float="left">
-  <img src="Assets/GIFs/1_before.gif" width="300"/>
-  <img src="Assets/GIFs/1_after.gif" width="300"/> 
+  <img src="Assets/Examples/GIFs/1_before.gif" width="300"/>
+  <img src="Assets/Examples/GIFs/1_after.gif" width="300"/> 
 </p>
 
 >__1. Set destination__ to blue target. __Unity's NavMeshAgent__ on the __left__, and __CustomNavMeshAgent__ on the __right__.
@@ -21,8 +21,8 @@ __What if a moving agent collides against a stopped agent that's currently in ob
 You can have them push the others. That's what this __CustomNavMesh__ system does "under the hood", you just have to use it's custom components, which are identical to the original ones, making the transition seamless.
 
 <p float="left">
-  <img src="Assets/GIFs/2_before.gif" width="350"/>
-  <img src="Assets/GIFs/2_after.gif" width="350"/> 
+  <img src="Assets/Examples/GIFs/2_before.gif" width="350"/>
+  <img src="Assets/Examples/GIFs/2_after.gif" width="350"/> 
 </p>
 
 >__2. Overlapping__ agents by throwing one against the others. The __agents__ are red and the __obstacles__ blue. __Unity's NavMeshAgent__ against agents that switched to __NavMeshObstacle__ on the __left__, and __CustomNavMeshAgents__ on the __right__. This is __just a showcase__, if you're trying to do something similar you should use __colliders__ and __physics__ instead since this system is simply used to __resolve agent overlap__.
@@ -32,20 +32,20 @@ Instead of doing this, why not just switch the obstacle to agent? That wouldn't 
 __What are the disadvantages?__ Well, every nav mesh component is duplicated, which makes it less performant. Shouldn't make a different unless you have a lot of agents.
 
 <p float="left">
-  <img src="Assets/GIFs/3_navigation_view.gif" width="700"/>
+  <img src="Assets/Examples/GIFs/3_navigation_view.gif" width="700"/>
 </p> 
 
->__3.__ The duplicated __NavMesh__ components. The __hidden__ components are on the __right__ side.
+>__3.1.__ The duplicated __NavMesh__ components. The __hidden__ components are on the __right__ side.
 
 # Custom classes
 
 __CustomNavMesh__ – you can choose the hidden game objects __relative position__ and whether or not they are __rendered__ by accessing the __class__ or through it's __singleton__ present in the __scene__.
 
 <p float="left">
-  <img src="Assets/GIFs/4_custom_nav_mesh_fields.gif" width="700"/>
+  <img src="Assets/Examples/GIFs/4_custom_nav_mesh_fields.gif" width="700"/>
 </p> 
 
->__4.__ Changing __CustomNavMesh__ fields.
+>__3.2.__ Changing __CustomNavMesh__ fields.
 
 * __CustomNavMeshSurface__ – add to each surface that is going to be baked. The __surfaces__ need to be __rendered meshes__ and not __Physics Colliders__ or __Terrains__.
 * __CustomNavMeshObstacle__ – replacement for __NavMeshObstacle__.
