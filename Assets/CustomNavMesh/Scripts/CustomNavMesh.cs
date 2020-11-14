@@ -6,11 +6,6 @@ using UnityEngine.SceneManagement;
 [ExecuteAlways, AddComponentMenu("")] // remove from Add Component list
 public class CustomNavMesh : MonoBehaviour
 {
-    // Why use a GameObject to GameObject dictionary instead of CustomNavMeshAgent to HiddenNavMeshAgent and 
-    // vice versa? To avoid them from resetting to null and loosing the correspondence between the two.
-    [SerializeField, HideInInspector] GameObjectDictionary customToHiddenAgents = new GameObjectDictionary();
-    [SerializeField, HideInInspector] GameObjectDictionary hiddenToCustomAgents = new GameObjectDictionary();
-
     /// <summary>
     /// A delegate which can be used to register callback methods to be invoked after the 
     /// CustomNavMesh's hidden translation is updated.
@@ -202,74 +197,6 @@ public class CustomNavMesh : MonoBehaviour
         return result;
     }
 
-    /// <summary>
-    /// Register a custom agent and it's hidden agent to prevent the custom agent 
-    /// from spawning more hidden agents then needed.
-    /// </summary>
-    /// <param name="customAgent">The custom agent</param>
-    /// <param name="hiddenAgent">The hidden agent</param>
-    public static void RegisterAgent(CustomNavMeshAgent customAgent, HiddenNavMeshAgent hiddenAgent)
-    {
-        Instance.customToHiddenAgents[customAgent.gameObject] = hiddenAgent.gameObject;
-        Instance.hiddenToCustomAgents[hiddenAgent.gameObject] = customAgent.gameObject;
-
-        hiddenAgent.OnRegister();
-    }
-
-    /// <summary>
-    /// Unregister the correspondence betweem a custom agent and it's hidden agent.
-    /// </summary>
-    /// <param name="customAgent">The custom agent</param>
-    /// <param name="hiddenAgent">The hidden agent</param>
-    public static void UnregisterAgent(CustomNavMeshAgent customAgent, HiddenNavMeshAgent hiddenAgent)
-    {
-        if(Instance != null)
-        {
-            Instance.hiddenToCustomAgents.Remove(hiddenAgent.gameObject);
-            Instance.customToHiddenAgents.Remove(customAgent.gameObject);
-        }
-    }
-
-    /// <summary>
-    /// Tries to retrieve the hidden agent from a custom agent. Returns false if the hidden agent is null.
-    /// </summary>
-    /// <param name="customAgent">The custom agent</param>
-    /// <param name="hiddenAgent">The hidden agent</param>
-    /// <returns></returns>
-    public static bool TryGetHiddenAgent(CustomNavMeshAgent customAgent, out HiddenNavMeshAgent hiddenAgent)
-    {
-        if (Instance == null)
-        {
-            hiddenAgent = null;
-        }
-        else
-        {
-            Instance.customToHiddenAgents.TryGetValue(customAgent.gameObject, out GameObject hiddenObject);
-            hiddenAgent = (hiddenObject != null) ? hiddenObject.GetComponent<HiddenNavMeshAgent>() : null;
-        }
-        return hiddenAgent != null;
-    }
-
-    /// <summary>
-    /// Tries to retrieve the custom agent from an hidden agent. Returns false if the custom agent is null.
-    /// </summary>
-    /// <param name="hiddenAgent">The hidden agent</param>
-    /// <param name="customAgent">The custom agent</param>
-    /// <returns></returns>
-    public static bool TryGetCustomAgent(HiddenNavMeshAgent hiddenAgent, out CustomNavMeshAgent customAgent)
-    {
-        if (Instance == null)
-        {
-            customAgent = null;
-        }
-        else
-        {
-            Instance.hiddenToCustomAgents.TryGetValue(hiddenAgent.gameObject, out GameObject customObject);
-            customAgent = (customObject != null) ? customObject.GetComponent<CustomNavMeshAgent>() : null;
-        }
-        return customAgent != null;
-    }
-
     private void OnDestroy()
     {
         if (Time.frameCount == 0) return; // ignore when entering and leaving play mode
@@ -290,9 +217,4 @@ public class CustomNavMesh : MonoBehaviour
             agent.enabled = false;
         }
     }
-
-    /// <summary>
-    /// Serialiable game object to game object dictionary.
-    /// </summary>
-    [Serializable] class GameObjectDictionary : UDictionary<GameObject, GameObject> { }
 }

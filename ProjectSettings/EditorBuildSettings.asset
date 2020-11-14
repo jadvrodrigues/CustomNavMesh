@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Examples/Scenes/2_push_stopped_after.unity
+    path: Assets/Examples/Scenes/2_push_stopped_agents_after.unity
     guid: 6f94bdd12647560478b2be51c7e08003
   m_configObjects: {}

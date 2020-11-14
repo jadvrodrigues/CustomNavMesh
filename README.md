@@ -61,7 +61,7 @@ __CustomNavMesh__ – you can choose the hidden game objects __relative position
 Clone or download this repository and open the project in Unity.
 Alternatively, you can copy the contents of `Assets/CustomNavMesh` to an existing project.
 
-The scenes used for some of the GIFs are available in the `Assets/Examples` folder. Just hit the Space Bar in play mode to test it.
+The scenes used for the GIFs are available in the `Assets/Examples` folder. Just hit the Space Bar in play mode to test it.
 
 Note: This project was created using __Unity 2019.4 LTS__ version. Tested in __PC Standalone__, __Android__ and __WebGL__.
 

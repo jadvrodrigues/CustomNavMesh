@@ -55,14 +55,16 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         }
     }
 
+    // Why serialize the game object? Because the CustomNavMeshAgent would reset to null.
+    [SerializeField, HideInInspector] GameObject customAgentGameObject;
     CustomNavMeshAgent customAgent;
     CustomNavMeshAgent CustomAgent
     {
         get
         {
-            if (customAgent == null)
+            if (customAgent == null && customAgentGameObject != null)
             {
-                CustomNavMesh.TryGetCustomAgent(this, out customAgent);
+                customAgent = customAgentGameObject.GetComponent<CustomNavMeshAgent>();
             }
             return customAgent;
         }
@@ -188,12 +190,16 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     }
 
     /// <summary>
-    /// Update everything. To be called from CustomNavMesh when this get registered. Note: in the 
-    /// agent and in the obstacle classes, this initialization is done in OnCustomEnable; however, 
-    /// in this case the CustomAgent is still null during OnCustomEnable.
+    /// Link this agent to a custom agent and update everything. To be called from CustomNavMeshAgent 
+    /// after this component is added. Note: in the agent and in the obstacle classes, this 
+    /// initialization is done in OnCustomEnable; however, in this case the CustomAgent 
+    /// property is still null during OnCustomEnable.
     /// </summary>
-    public void OnRegister()
+    public void LinkWithCustomAgent(CustomNavMeshAgent customAgent)
     {
+        customAgentGameObject = (customAgent != null) ? customAgent.gameObject : null;
+        this.customAgent = customAgent;
+
         UpdateAgent();
         UpdateMesh();
         UpdateVisibility();

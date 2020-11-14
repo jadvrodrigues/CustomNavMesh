@@ -291,19 +291,22 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_CarveOnlyStationary = value; onChange?.Invoke(); }
     }
 
+    // Why serialize the game object? Because the HiddenNavMeshAgent would reset to null.
+    [SerializeField, HideInInspector] GameObject hiddenAgentGameObject;
     HiddenNavMeshAgent hiddenAgent;
     HiddenNavMeshAgent HiddenAgent
     {
         get
         {
-            if (hiddenAgent == null)
+            if (hiddenAgent == null && hiddenAgentGameObject != null)
             {
-                CustomNavMesh.TryGetHiddenAgent(this, out hiddenAgent);
+                hiddenAgent = hiddenAgentGameObject.GetComponent<HiddenNavMeshAgent>();
             }
             return hiddenAgent;
         }
         set
         {
+            hiddenAgentGameObject = (value != null) ? value.gameObject : null;
             hiddenAgent = value;
         }
     }
@@ -543,7 +546,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         hiddenObject.isStatic = gameObject.isStatic;
 #endif
             HiddenAgent = hiddenObject.AddComponent<HiddenNavMeshAgent>();
-            CustomNavMesh.RegisterAgent(this, HiddenAgent);
+            HiddenAgent.LinkWithCustomAgent(this);
         }
     }
 
@@ -551,8 +554,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     {
         if (HiddenAgent != null)
         {
-            CustomNavMesh.UnregisterAgent(this, HiddenAgent);
-            if(Application.isPlaying)
+            if (Application.isPlaying)
             {
                 Destroy(HiddenAgent.gameObject);
             }
