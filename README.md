@@ -13,12 +13,10 @@ __How do the agents avoid others?__ The Unity's __NavMeshAgent__ only goes aroun
 
 >__1. Set destination__ to blue target. __Unity's NavMeshAgent__ on the __left__, and __CustomNavMeshAgent__ on the __right__.
 
-__What if a moving agent collides against a stopped agent that's currently in obstacle mode?__ Normally, it wouldn't be able to push it. However, if you:
-* duplicate the baked surface, obstacle and agents
-* make the duplicated agents switch between __NavMeshAgent__ and __NavMeshObstacle__ instead of the original ones
-* have the original agent copy the duplicated one's velocity, and the duplicated one copy the original's position at every frame
-
-You can have them push the others:
+__What if a moving agent collides against a stopped agent that's currently in obstacle mode?__ Normally, it wouldn't be able to push it. However, by:
+* duplicating the baked surface, obstacle and agents
+* making the duplicated agents switch between __NavMeshAgent__ and __NavMeshObstacle__ instead of the original ones
+* having each original agent copy the duplicated one's velocity, and the duplicated one copy the original's position at every frame
 
 <p float="left">
   <img src="Assets/Examples/GIFs/3_navigation_view.gif" width="700"/>
@@ -26,7 +24,7 @@ You can have them push the others:
 
 >__2.__ The duplicated __NavMesh__ components. The __hidden__ components are on the __right__ side.
 
-That's what this __CustomNavMesh__ system does *under the hood*, you just have to use it's __custom components__, which are __identical to the original ones__, making the transition __seamless__.
+__You can__ have them __push__ the __others__. This is how the __CustomNavMesh__ system works *under the hood*. You just have to use it's __custom components__, which are __identical to the original ones__, making the transition __seamless__.
 
 <p float="left">
   <img src="Assets/Examples/GIFs/2_before.gif" width="350"/>
@@ -35,7 +33,7 @@ That's what this __CustomNavMesh__ system does *under the hood*, you just have t
 
 >__3. Overlapping__ agents by throwing one against the others. The __agents__ are red and the __obstacles__ blue. __Unity's NavMeshAgent__ against agents that switched to __NavMeshObstacle__ on the __left__, and __CustomNavMeshAgents__ on the __right__. This is __just a showcase__, if you're trying to do something similar you should use __colliders__ and __physics__ instead since this system is simply used to __resolve agent overlap__.
 
-Instead of doing this, why not just switch the obstacle to agent? That wouldn't work because that switch isn't instant, it takes at least two frames.
+__Why not__ just __switch__ the __obstacle__ to __agent__ instead? That wouldn't work because that switch isn't instant, it takes at least two frames.
 
 __What are the disadvantages?__ Every __NavMesh__ component is duplicated, which makes it less performant. It shouldn't be noticeable unless you have a lot of agents.
 

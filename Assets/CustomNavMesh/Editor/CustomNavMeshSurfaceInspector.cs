@@ -1,16 +1,23 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using System;
 
 [CanEditMultipleObjects, CustomEditor(typeof(CustomNavMeshSurface))]
 public class CustomNavMeshSurfaceInspector : Editor
 {
-    CustomNavMeshSurface surface;
-
     SerializedProperty mesh;
+
+    CustomNavMeshSurface[] surfaces
+    {
+        get
+        {
+            return Array.ConvertAll(targets, obj => (CustomNavMeshSurface)obj);
+        }
+    }
 
     private void OnEnable()
     {
-        surface = target as CustomNavMeshSurface;
+        var surface = target as CustomNavMeshSurface;
         surface.GetComponent<MeshFilter>().hideFlags = HideFlags.HideInInspector;
 
         mesh = serializedObject.FindProperty("mesh");
@@ -28,10 +35,13 @@ public class CustomNavMeshSurfaceInspector : Editor
         {
             Undo.RecordObject(target, "Changed Surface Mesh");
 
-            var meshFilter = surface.GetComponent<MeshFilter>();
-            if(meshFilter != null) Undo.RecordObject(meshFilter, "");
+            foreach (var surface in surfaces)
+            {
+                var meshFilter = surface.GetComponent<MeshFilter>();
+                if (meshFilter != null) Undo.RecordObject(meshFilter, "");
 
-            surface.Mesh = (Mesh) mesh.objectReferenceValue;
+                surface.Mesh = (Mesh)mesh.objectReferenceValue;
+            }
 
             serializedObject.ApplyModifiedProperties(); // needed to create a prefab override
         }

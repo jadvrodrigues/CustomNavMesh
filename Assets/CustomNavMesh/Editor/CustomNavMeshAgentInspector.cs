@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -6,9 +7,6 @@ using UnityEngine.AI;
 public class CustomNavMeshAgentInspector : Editor
 {
     static readonly GUIContent s_Text = new GUIContent();
-
-    CustomNavMeshAgent agent;
-    NavMeshAgent navMeshAgent;
 
     SerializedProperty m_AgentTypeID;
     SerializedProperty m_Radius;
@@ -33,6 +31,14 @@ public class CustomNavMeshAgentInspector : Editor
     SerializedProperty m_TimeToStationary;
     SerializedProperty m_CarveOnlyStationary;
 
+    CustomNavMeshAgent[] Agents
+    {
+        get
+        {
+            return Array.ConvertAll(targets, obj => (CustomNavMeshAgent) obj);
+        }
+    }
+
     private class Styles
     {
         public readonly GUIContent m_AgentSteeringHeader = EditorGUIUtility.TrTextContent("Steering");
@@ -45,8 +51,8 @@ public class CustomNavMeshAgentInspector : Editor
 
     private void OnEnable()
     {
-        agent = target as CustomNavMeshAgent;
-        navMeshAgent = agent.GetComponent<NavMeshAgent>();
+        var agent = target as CustomNavMeshAgent;
+        var navMeshAgent = agent.GetComponent<NavMeshAgent>();
         if (navMeshAgent != null)
         {
             // prevent the user from changing the agent through the NavMeshAgent's inspector
@@ -90,10 +96,12 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_BaseOffset);
         if(EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Base Offset");
-            Undo.RecordObject(navMeshAgent, "");
-
-            agent.BaseOffset = m_BaseOffset.floatValue;
+            foreach(var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Base Offset");
+                agent.RecordNavMeshAgent();
+                agent.BaseOffset = m_BaseOffset.floatValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -105,11 +113,14 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_Speed);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Speed");
-            Undo.RecordObject(navMeshAgent, "");
-
             if (m_Speed.floatValue < 0.0f) m_Speed.floatValue = 0.0f;
-            agent.Speed = m_Speed.floatValue;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Speed");
+                agent.RecordNavMeshAgent();
+                agent.Speed = m_Speed.floatValue;
+            }           
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -118,11 +129,14 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_AngularSpeed);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Angular Speed");
-            Undo.RecordObject(navMeshAgent, "");
-
             if (m_AngularSpeed.floatValue < 0.0f) m_AngularSpeed.floatValue = 0.0f;
-            agent.AngularSpeed = m_AngularSpeed.floatValue;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Angular Speed");
+                agent.RecordNavMeshAgent();
+                agent.AngularSpeed = m_AngularSpeed.floatValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -131,11 +145,14 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_Acceleration);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Acceleration");
-            Undo.RecordObject(navMeshAgent, "");
-
             if (m_Acceleration.floatValue < 0.0f) m_Acceleration.floatValue = 0.0f;
-            agent.Acceleration = m_Acceleration.floatValue;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Acceleration");
+                agent.RecordNavMeshAgent();
+                agent.Acceleration = m_Acceleration.floatValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -144,11 +161,14 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_StoppingDistance);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Stopping Distance");
-            Undo.RecordObject(navMeshAgent, "");
-
             if (m_StoppingDistance.floatValue < 0.0f) m_StoppingDistance.floatValue = 0.0f;
-            agent.StoppingDistance = m_StoppingDistance.floatValue;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Stopping Distance");
+                agent.RecordNavMeshAgent();
+                agent.StoppingDistance = m_StoppingDistance.floatValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -157,10 +177,12 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_AutoBraking);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Auto Braking");
-            Undo.RecordObject(navMeshAgent, "");
-
-            agent.AutoBraking = m_AutoBraking.boolValue;
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Auto Braking");
+                agent.RecordNavMeshAgent();
+                agent.AutoBraking = m_AutoBraking.boolValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -172,11 +194,14 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_Radius);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Radius");
-            Undo.RecordObject(navMeshAgent, "");
-
             if (m_Radius.floatValue <= 0.0f) m_Radius.floatValue = 1e-05f;
-            agent.Radius = m_Radius.floatValue;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Radius");
+                agent.RecordNavMeshAgent();
+                agent.Radius = m_Radius.floatValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -185,11 +210,14 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_Height);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Height");
-            Undo.RecordObject(navMeshAgent, "");
-
             if (m_Height.floatValue <= 0.0f) m_Height.floatValue = 1e-05f;
-            agent.Height = m_Height.floatValue;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Height");
+                agent.RecordNavMeshAgent();
+                agent.Height = m_Height.floatValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -198,10 +226,12 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_ObstacleAvoidanceType, Temp("Quality"));
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Obstacle Avoidance Type");
-            Undo.RecordObject(navMeshAgent, "");
-
-            agent.ObstacleAvoidanceType = (ObstacleAvoidanceType) m_ObstacleAvoidanceType.enumValueIndex;
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Obstacle Avoidance Type");
+                agent.RecordNavMeshAgent();
+                agent.ObstacleAvoidanceType = (ObstacleAvoidanceType)m_ObstacleAvoidanceType.enumValueIndex;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -210,12 +240,15 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_AvoidancePriority, Temp("Priority"));
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Avoidance Priority");
-            Undo.RecordObject(navMeshAgent, "");
-
             if (m_AvoidancePriority.intValue < 0) m_AvoidancePriority.intValue = 0;
             if (m_AvoidancePriority.intValue > 99) m_AvoidancePriority.intValue = 99;
-            agent.AvoidancePriority = m_AvoidancePriority.intValue;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Avoidance Priority");
+                agent.RecordNavMeshAgent();
+                agent.AvoidancePriority = m_AvoidancePriority.intValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -227,10 +260,12 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_AutoTraverseOffMeshLink);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Auto Traverse Off Mesh Link");
-            Undo.RecordObject(navMeshAgent, "");
-
-            agent.AutoTraverseOffMeshLink = m_AutoTraverseOffMeshLink.boolValue;
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Auto Traverse Off Mesh Link");
+                agent.RecordNavMeshAgent();
+                agent.AutoTraverseOffMeshLink = m_AutoTraverseOffMeshLink.boolValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -239,10 +274,12 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_AutoRepath);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Auto Repath");
-            Undo.RecordObject(navMeshAgent, "");
-
-            agent.AutoRepath = m_AutoRepath.boolValue;
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Auto Repath");
+                agent.RecordNavMeshAgent();
+                agent.AutoRepath = m_AutoRepath.boolValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -295,10 +332,12 @@ public class CustomNavMeshAgentInspector : Editor
                 m_WalkableMask.longValue = newMask;
             }
 
-            Undo.RecordObject(target, "Changed Agent Area Mask");
-            Undo.RecordObject(navMeshAgent, "");
-
-            agent.AreaMask = m_WalkableMask.intValue;
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Area Mask");
+                agent.RecordNavMeshAgent();
+                agent.AreaMask = m_WalkableMask.intValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -318,11 +357,13 @@ public class CustomNavMeshAgentInspector : Editor
 
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Time To Block");
-            Undo.RecordObject(navMeshAgent, "");
-
             if (m_TimeToBlock.floatValue < 0.0f) m_TimeToBlock.floatValue = 0.0f;
-            agent.TimeToBlock = m_TimeToBlock.floatValue;
+            
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Time To Block");
+                agent.TimeToBlock = m_TimeToBlock.floatValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -336,11 +377,13 @@ public class CustomNavMeshAgentInspector : Editor
             );
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Unblock Speed Threshold");
-            Undo.RecordObject(navMeshAgent, "");
-
             if (m_UnblockSpeedThreshold.floatValue < 0.0f) m_UnblockSpeedThreshold.floatValue = 0.0f;
-            agent.UnblockSpeedThreshold = m_UnblockSpeedThreshold.floatValue;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Unblock Speed Threshold");
+                agent.UnblockSpeedThreshold = m_UnblockSpeedThreshold.floatValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -354,11 +397,13 @@ public class CustomNavMeshAgentInspector : Editor
             );
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Block Refresh Interval");
-            Undo.RecordObject(navMeshAgent, "");
-
             if (m_BlockRefreshInterval.floatValue < 0.0f) m_BlockRefreshInterval.floatValue = 0.0f;
-            agent.BlockRefreshInterval = m_BlockRefreshInterval.floatValue;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Block Refresh Interval");
+                agent.BlockRefreshInterval = m_BlockRefreshInterval.floatValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -374,11 +419,13 @@ public class CustomNavMeshAgentInspector : Editor
 
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent How Much Closer To Leave Block Mode");
-            Undo.RecordObject(navMeshAgent, "");
-
             if (m_MinDistanceBoostToStopBlock.floatValue < 0.0f) m_MinDistanceBoostToStopBlock.floatValue = 0.0f;
-            agent.MinDistanceBoostToStopBlock = m_MinDistanceBoostToStopBlock.floatValue;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent How Much Closer To Leave Block Mode");
+                agent.MinDistanceBoostToStopBlock = m_MinDistanceBoostToStopBlock.floatValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -392,11 +439,13 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_CarvingMoveThreshold);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Carving Move Threshold");
-            Undo.RecordObject(navMeshAgent, "");
-
             if (m_CarvingMoveThreshold.floatValue < 0.0f) m_CarvingMoveThreshold.floatValue = 0.0f;
-            agent.CarvingMoveThreshold = m_CarvingMoveThreshold.floatValue;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Carving Move Threshold");
+                agent.CarvingMoveThreshold = m_CarvingMoveThreshold.floatValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -405,11 +454,13 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_TimeToStationary);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Carving Time To Stationary");
-            Undo.RecordObject(navMeshAgent, "");
-
             if (m_TimeToStationary.floatValue < 0.0f) m_TimeToStationary.floatValue = 0.0f;
-            agent.CarvingTimeToStationary = m_TimeToStationary.floatValue;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Carving Time To Stationary");
+                agent.CarvingTimeToStationary = m_TimeToStationary.floatValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -418,10 +469,11 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.PropertyField(m_CarveOnlyStationary);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Agent Carve Only Stationary");
-            Undo.RecordObject(navMeshAgent, "");
-
-            agent.CarveOnlyStationary = m_CarveOnlyStationary.boolValue;
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Carve Only Stationary");
+                agent.CarveOnlyStationary = m_CarveOnlyStationary.boolValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -471,10 +523,12 @@ public class CustomNavMeshAgentInspector : Editor
                 UnityEditor.AI.NavMeshEditorHelpers.OpenAgentSettings(-1);
             }
 
-            Undo.RecordObject(target, "Changed Agent Type");
-            Undo.RecordObject(navMeshAgent, "");
-
-            agent.AgentTypeID = agentTypeID.intValue;
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Type");
+                agent.RecordNavMeshAgent();
+                agent.AgentTypeID = agentTypeID.intValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }

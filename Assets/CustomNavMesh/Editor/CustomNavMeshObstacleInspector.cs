@@ -1,13 +1,11 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using UnityEngine.AI;
+using System;
 
 [CanEditMultipleObjects, CustomEditor(typeof(CustomNavMeshObstacle))]
 public class CustomNavMeshObstacleInspector : Editor
 {
-    CustomNavMeshObstacle obstacle;
-    NavMeshObstacle navMeshObstacle;
-
     SerializedProperty m_Shape;
     SerializedProperty m_Center;
     SerializedProperty m_Size;
@@ -16,10 +14,18 @@ public class CustomNavMeshObstacleInspector : Editor
     SerializedProperty m_TimeToStationary;
     SerializedProperty m_CarveOnlyStationary;
 
+    CustomNavMeshObstacle[] Obstacles
+    {
+        get
+        {
+            return Array.ConvertAll(targets, obj => (CustomNavMeshObstacle)obj);
+        }
+    }
+
     private void OnEnable()
     {
-        obstacle = target as CustomNavMeshObstacle;
-        navMeshObstacle = obstacle.GetComponent<NavMeshObstacle>();
+        var obstacle = target as CustomNavMeshObstacle;
+        var navMeshObstacle = obstacle.GetComponent<NavMeshObstacle>();
         if (navMeshObstacle != null)
         {
             // prevent the user from changing the obstacle through the NavMeshObstacle's inspector
@@ -43,18 +49,23 @@ public class CustomNavMeshObstacleInspector : Editor
         EditorGUILayout.PropertyField(m_Shape);
         if (EditorGUI.EndChangeCheck()) // if shape changed
         {
-            Undo.RecordObject(target, "Changed Obstacle Shape");
-            Undo.RecordObject(navMeshObstacle, "");
-
-            obstacle.Shape = (NavMeshObstacleShape) m_Shape.enumValueIndex;
-            obstacle.Center = Vector3.zero;
+            Vector3 size = Vector3.zero;
             if (m_Shape.enumValueIndex == 0) // capsule
             {
-                obstacle.Size = new Vector3(1.0f, 2.0f, 1.0f);
+                size = new Vector3(1.0f, 2.0f, 1.0f);
             }
             else if (m_Shape.enumValueIndex == 1) // box
             {
-                obstacle.Size = Vector3.one;
+                size = Vector3.one;
+            }
+
+            foreach (var obstacle in Obstacles)
+            {
+                Undo.RecordObject(obstacle, "Changed Obstacle Shape");
+                obstacle.RecordNavMeshObstacle();
+                obstacle.Shape = (NavMeshObstacleShape)m_Shape.enumValueIndex;
+                obstacle.Center = Vector3.zero;
+                obstacle.Size = size;
             }
 
             serializedObject.Update();
@@ -65,10 +76,12 @@ public class CustomNavMeshObstacleInspector : Editor
         EditorGUILayout.PropertyField(m_Center);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Obstacle Center");
-            Undo.RecordObject(navMeshObstacle, "");
-
-            obstacle.Center = m_Center.vector3Value;
+            foreach (var obstacle in Obstacles)
+            {
+                Undo.RecordObject(obstacle, "Changed Obstacle Center");
+                obstacle.RecordNavMeshObstacle();
+                obstacle.Center = m_Center.vector3Value;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -80,10 +93,12 @@ public class CustomNavMeshObstacleInspector : Editor
             float height = EditorGUILayout.FloatField("Height", m_Size.vector3Value.y);
             if (EditorGUI.EndChangeCheck())
             {
-                Undo.RecordObject(target, "Changed Obstacle Size");
-                Undo.RecordObject(navMeshObstacle, "");
-
-                obstacle.Size = new Vector3(radius * 2.0f, height, radius * 2.0f);
+                foreach (var obstacle in Obstacles)
+                {
+                    Undo.RecordObject(obstacle, "Changed Obstacle Size");
+                    obstacle.RecordNavMeshObstacle();
+                    obstacle.Size = new Vector3(radius * 2.0f, height, radius * 2.0f);
+                }
 
                 serializedObject.ApplyModifiedProperties();
             }
@@ -95,10 +110,12 @@ public class CustomNavMeshObstacleInspector : Editor
             size = EditorGUILayout.Vector3Field("Size", size);
             if (EditorGUI.EndChangeCheck())
             {
-                Undo.RecordObject(target, "Changed Obstacle Size");
-                Undo.RecordObject(navMeshObstacle, "");
-
-                obstacle.Size = size;
+                foreach (var obstacle in Obstacles)
+                {
+                    Undo.RecordObject(obstacle, "Changed Obstacle Size");
+                    obstacle.RecordNavMeshObstacle();
+                    obstacle.Size = size;
+                }
 
                 serializedObject.ApplyModifiedProperties();
             }
@@ -108,10 +125,12 @@ public class CustomNavMeshObstacleInspector : Editor
         EditorGUILayout.PropertyField(m_Carve);
         if (EditorGUI.EndChangeCheck())
         {
-            Undo.RecordObject(target, "Changed Obstacle Carving");
-            Undo.RecordObject(navMeshObstacle, "");
-
-            obstacle.Carving = m_Carve.boolValue;
+            foreach (var obstacle in Obstacles)
+            {
+                Undo.RecordObject(obstacle, "Changed Obstacle Carving");
+                obstacle.RecordNavMeshObstacle();
+                obstacle.Carving = m_Carve.boolValue;
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -124,10 +143,12 @@ public class CustomNavMeshObstacleInspector : Editor
             EditorGUILayout.PropertyField(m_MoveThreshold);
             if (EditorGUI.EndChangeCheck())
             {
-                Undo.RecordObject(target, "Changed Obstacle Carving Move Threshold");
-                Undo.RecordObject(navMeshObstacle, "");
-
-                obstacle.CarvingMoveThreshold = m_MoveThreshold.floatValue;
+                foreach (var obstacle in Obstacles)
+                {
+                    Undo.RecordObject(obstacle, "Changed Obstacle Carving Move Threshold");
+                    obstacle.RecordNavMeshObstacle();
+                    obstacle.CarvingMoveThreshold = m_MoveThreshold.floatValue;
+                }
 
                 serializedObject.ApplyModifiedProperties();
             }
@@ -137,10 +158,12 @@ public class CustomNavMeshObstacleInspector : Editor
             EditorGUILayout.PropertyField(m_TimeToStationary);
             if (EditorGUI.EndChangeCheck())
             {
-                Undo.RecordObject(target, "Changed Obstacle Carving Time To Stationary");
-                Undo.RecordObject(navMeshObstacle, "");
-
-                obstacle.CarvingTimeToStationary = m_TimeToStationary.floatValue;
+                foreach (var obstacle in Obstacles)
+                {
+                    Undo.RecordObject(obstacle, "Changed Obstacle Carving Time To Stationary");
+                    obstacle.RecordNavMeshObstacle();
+                    obstacle.CarvingTimeToStationary = m_TimeToStationary.floatValue;
+                }
 
                 serializedObject.ApplyModifiedProperties();
             }
@@ -149,10 +172,12 @@ public class CustomNavMeshObstacleInspector : Editor
             EditorGUILayout.PropertyField(m_CarveOnlyStationary);
             if (EditorGUI.EndChangeCheck())
             {
-                Undo.RecordObject(target, "Changed Obstacle Carving Only Stationary");
-                Undo.RecordObject(navMeshObstacle, "");
-
-                obstacle.CarveOnlyStationary = m_CarveOnlyStationary.boolValue;
+                foreach (var obstacle in Obstacles)
+                {
+                    Undo.RecordObject(obstacle, "Changed Obstacle Carving Only Stationary");
+                    obstacle.RecordNavMeshObstacle();
+                    obstacle.CarveOnlyStationary = m_CarveOnlyStationary.boolValue;
+                }
 
                 serializedObject.ApplyModifiedProperties();
             }

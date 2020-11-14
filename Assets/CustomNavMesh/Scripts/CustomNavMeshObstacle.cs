@@ -192,6 +192,14 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
         destObs.size = sourceObs.m_Size;
     }
 
+    /// <summary>
+    /// Records any changes done on the NavMeshObstacle after this call.
+    /// </summary>
+    public void RecordNavMeshObstacle()
+    {
+        Undo.RecordObject(NavMeshObstacle, "");
+    }
+
 #if UNITY_EDITOR
     // only method called as a prefab in the Assets folder (except OnCustomDestroy)
     private void OnValidate()

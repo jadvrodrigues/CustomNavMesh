@@ -463,6 +463,14 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         destAgent.avoidancePriority = sourceAgent.AvoidancePriority;
     }
 
+    /// <summary>
+    /// Records any changes done on the NavMeshAgent after this call.
+    /// </summary>
+    public void RecordNavMeshAgent()
+    {
+        Undo.RecordObject(NavMeshAgent, "");
+    }
+
     // hide Update method because this has to be triggered both inside and outside 
     // of Play mode and the inherited OnCustomUpdate is only called in Play mode
     new void Update()
