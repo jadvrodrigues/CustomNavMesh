@@ -120,7 +120,7 @@ NavMeshSettings:
     accuratePlacement: 0
     debug:
       m_Flags: 0
-  m_NavMeshData: {fileID: 23800000, guid: c75b3faabe9eb1a41822753fa7ad9184, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: 7ca026bef7ba29f4980197b054fa6174, type: 2}
 --- !u!1 &104470907
 GameObject:
   m_ObjectHideFlags: 0
@@ -242,16 +242,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f44184083cb60c4aa4b9f88642bdfd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customToHiddenAgents:
-    m_keys:
-    - {fileID: 0}
-    m_values:
-    - {fileID: 0}
-  hiddenToCustomAgents:
-    m_keys:
-    - {fileID: 0}
-    m_values:
-    - {fileID: 0}
   hiddenTranslation: {x: 1000, y: 0, z: 0}
   renderHidden: 1
 --- !u!4 &431573680
