@@ -1,37 +1,33 @@
 # Custom Nav Mesh
 
-Alternative to Unity's NavMesh system where the __agents avoid the other non moving agents__ in their pathing. This still uses the official navigation system but you have to use it's components instead. Compatible with __NavMeshComponents__.
+Alternative to Unity's NavMesh system where the __agents avoid the other non moving agents__ in their pathing. It uses the official navigation system but you have to use it's components instead. Compatible with __NavMeshComponents__.
 
 # How it works
 
 __How do the agents avoid others?__ The Unity's __NavMeshAgent__ only goes around __NavMeshObstacles__ and ignores the other agents in their path. By disabling __NavMeshAgent__ and enabling __NavMeshObstacle__ when an agent is not moving noticeably, the agents now avoid other non moving agents in their pathing.
 
-<p float="left">
-  <img src="Assets/Examples/GIFs/1_before.gif" width="300"/>
-  <img src="Assets/Examples/GIFs/1_after.gif" width="300"/> 
-</p>
+Unity's NavMeshAgent             |  CustomNavMeshAgent
+:-------------------------:|:-------------------------:
+![](Assets/Examples/GIFs/1_before.gif)  |  ![](Assets/Examples/GIFs/1_after.gif)
 
->__1. Set destination__ to blue target. __Unity's NavMeshAgent__ on the __left__, and __CustomNavMeshAgent__ on the __right__.
+>__1. Set destination__ to blue target.
 
 __What if a moving agent collides against a stopped agent that's currently in obstacle mode?__ Normally, it wouldn't be able to push it. However, by:
-* duplicating the baked surface, obstacle and agents
-* making the duplicated agents switch between __NavMeshAgent__ and __NavMeshObstacle__ instead of the original ones
-* having each original agent copy the duplicated one's velocity, and the duplicated one copy the original's position at every frame
+* duplicating the baked surface, obstacle and agents;
+* making the duplicated agents switch between __NavMeshAgent__ and __NavMeshObstacle__ instead of the original ones;
+* having each original agent copy the duplicated one's velocity, and the duplicated one copy the original's position at every frame.
 
-<p float="left">
-  <img src="Assets/Examples/GIFs/3_navigation_view.gif" width="700"/>
-</p> 
+![](Assets/Examples/GIFs/2_navigation_view.gif)
 
 >__2.__ The duplicated __NavMesh__ components. The __hidden__ components are on the __right__ side.
 
 __You can__ have them __push__ the __others__. This is how the __CustomNavMesh__ system works *under the hood*. You just have to use it's __custom components__, which are __identical to the original ones__, making the transition __seamless__.
 
-<p float="left">
-  <img src="Assets/Examples/GIFs/2_before.gif" width="350"/>
-  <img src="Assets/Examples/GIFs/2_after.gif" width="350"/> 
-</p>
+NavMeshAgent vs NavMeshObstacle "Agents"            |  CustomNavMeshAgents
+:-------------------------:|:-------------------------:
+![](Assets/Examples/GIFs/3_before.gif)  |  ![](Assets/Examples/GIFs/3_after.gif)
 
->__3. Overlapping__ agents by throwing one against the others. The __agents__ are red and the __obstacles__ blue. __Unity's NavMeshAgent__ against agents that switched to __NavMeshObstacle__ on the __left__, and __CustomNavMeshAgents__ on the __right__. This is __just a showcase__, if you're trying to do something similar you should use __colliders__ and __physics__ instead since this system is simply used to __resolve agent overlap__.
+>__3. Overlapping__ agents by throwing one against the others. The __agents__ are red and the __obstacles__ blue. This is __just a showcase__, if you're trying to do something similar you should use __colliders__ and __physics__ instead since this system is simply used to __resolve agent overlap__.
 
 __Why not__ just __switch__ the __obstacle__ to __agent__ instead? That wouldn't work because that switch isn't instant, it takes at least two frames.
 
@@ -41,9 +37,7 @@ __What are the disadvantages?__ Every __NavMesh__ component is duplicated, which
 
 __CustomNavMesh__ – you can choose the hidden game objects __relative position__ and whether or not they are __rendered__ by accessing the __class__ or through it's __singleton__ present in the __scene__.
 
-<p float="left">
-  <img src="Assets/Examples/GIFs/4_custom_nav_mesh_fields.gif" width="700"/>
-</p> 
+![](Assets/Examples/GIFs/4_custom_nav_mesh_fields.gif)
 
 >__4.__ Changing __CustomNavMesh__ fields.
 
