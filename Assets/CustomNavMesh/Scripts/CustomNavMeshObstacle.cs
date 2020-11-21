@@ -197,7 +197,9 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
     /// </summary>
     public void RecordNavMeshObstacle()
     {
+#if UNITY_EDITOR
         Undo.RecordObject(NavMeshObstacle, "");
+#endif
     }
 
 #if UNITY_EDITOR

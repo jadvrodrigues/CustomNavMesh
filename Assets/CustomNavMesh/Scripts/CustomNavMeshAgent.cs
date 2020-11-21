@@ -468,7 +468,9 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     /// </summary>
     public void RecordNavMeshAgent()
     {
+#if UNITY_EDITOR
         Undo.RecordObject(NavMeshAgent, "");
+#endif
     }
 
     // hide Update method because this has to be triggered both inside and outside 
