@@ -212,6 +212,16 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         TrySubscribe();
     }
 
+    /// <summary>
+    /// Checks if this hidden agent is linked with the specified custom agent.
+    /// </summary>
+    /// <param name="customAgent">The custom agent.</param>
+    /// <returns>True if the specified agent is indeed the linked one; otherwise, false.</returns>
+    public bool IsLinkedWith(CustomNavMeshAgent customAgent)
+    {
+        return CustomAgent == customAgent;
+    }
+
     protected override void OnCustomEnable()
     {
         var meshFilter = GetComponent<MeshFilter>();

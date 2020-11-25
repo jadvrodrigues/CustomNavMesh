@@ -543,7 +543,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
 
     void TryCreatingHiddenAgent()
     {
-        if (HiddenAgent == null)
+        if (HiddenAgent == null || !HiddenAgent.IsLinkedWith(this))
         {
             var hiddenObject = new GameObject("(Hidden) " + name);
             hiddenObject.hideFlags = HideFlags.NotEditable;
