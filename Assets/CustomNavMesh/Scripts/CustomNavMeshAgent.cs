@@ -334,21 +334,6 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     }
 
     Transform savedParent;
-    Transform SavedParent
-    {
-        get
-        {
-            if (savedParent == null)
-            {
-                savedParent = transform.parent;
-            }
-            return savedParent;
-        }
-        set
-        {
-            savedParent = value;
-        }
-    }
 
     Vector3? savedPosition;
     Vector3? SavedPosition
@@ -485,9 +470,9 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
                 onPositionChange?.Invoke();
             }
 
-            if (SavedParent != transform.parent)
+            if (savedParent != transform.parent)
             {
-                SavedParent = transform.parent;
+                savedParent = transform.parent;
                 onParentChange?.Invoke();
             }
 
@@ -520,6 +505,8 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         NavMeshAgent.enabled = true;
 
         TryCreatingHiddenAgent();
+
+        savedParent = transform.parent;
     }
 
     protected override void OnCustomDisable()
