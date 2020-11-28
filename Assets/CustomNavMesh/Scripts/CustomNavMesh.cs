@@ -6,17 +6,6 @@ using UnityEngine.SceneManagement;
 [ExecuteAlways, AddComponentMenu("")] // remove from Add Component list
 public class CustomNavMesh : MonoBehaviour
 {
-    /// <summary>
-    /// A delegate which can be used to register callback methods to be invoked after the 
-    /// CustomNavMesh's hidden translation is updated.
-    /// </summary>
-    public delegate void OnHiddenTranslationUpdate();
-    /// <summary>
-    /// Subscribe functions to be called after the CustomNavMesh's hidden translation is updated.
-    /// This is reset every time you enter Play mode.
-    /// </summary>
-    public static event OnHiddenTranslationUpdate onHiddenTranslationUpdate;
-
     static CustomNavMesh instance;
     static CustomNavMesh Instance
     {
@@ -25,10 +14,6 @@ public class CustomNavMesh : MonoBehaviour
             if (instance == null)
             {
                 instance = (CustomNavMesh)FindObjectOfType(typeof(CustomNavMesh));
-
-                // Reset the static events to avoid them from calling methods from objects not present in the current scene
-                onHiddenTranslationUpdate = null;
-                onRenderHiddenUpdate = null;
 
                 if (instance == null)
                 {
@@ -43,6 +28,29 @@ public class CustomNavMesh : MonoBehaviour
             }
 
             return instance;
+        }
+    }
+
+    /// <summary>
+    /// A delegate which can be used to register callback methods to be invoked after the 
+    /// CustomNavMesh's hidden translation is updated.
+    /// </summary>
+    public delegate void OnHiddenTranslationUpdate();
+
+    event OnHiddenTranslationUpdate m_onHiddenTranslationUpdate;
+    /// <summary>
+    /// Subscribe functions to be called after the CustomNavMesh's hidden translation is updated.
+    /// This is reset every time you enter Play mode.
+    /// </summary>
+    public static event OnHiddenTranslationUpdate onHiddenTranslationUpdate
+    {
+        add
+        {
+            if (Instance != null) Instance.m_onHiddenTranslationUpdate += value;
+        }
+        remove
+        {
+            if (Instance != null) Instance.m_onHiddenTranslationUpdate -= value;
         }
     }
 
@@ -62,7 +70,7 @@ public class CustomNavMesh : MonoBehaviour
             if (Instance.hiddenTranslation != value)
             {
                 Instance.hiddenTranslation = value;
-                onHiddenTranslationUpdate?.Invoke();
+                Instance.m_onHiddenTranslationUpdate?.Invoke();
             }
         }
     }
@@ -72,11 +80,23 @@ public class CustomNavMesh : MonoBehaviour
     /// CustomNavMesh's render hidden is updated.
     /// </summary>
     public delegate void OnRenderHiddenUpdate();
+
+    event OnRenderHiddenUpdate m_onRenderHiddenUpdate;
     /// <summary>
     /// Subscribe functions to be called after the CustomNavMesh's render hidden is updated. 
     /// This is reset every time you enter Play mode.
     /// </summary>
-    public static event OnRenderHiddenUpdate onRenderHiddenUpdate;
+    public static event OnRenderHiddenUpdate onRenderHiddenUpdate
+    {
+        add
+        {
+            if (Instance != null) Instance.m_onRenderHiddenUpdate += value;
+        }
+        remove
+        {
+            if (Instance != null) Instance.m_onRenderHiddenUpdate -= value;
+        }
+    }
 
     [SerializeField, HideInInspector] bool renderHidden = true;
     /// <summary>
@@ -93,7 +113,7 @@ public class CustomNavMesh : MonoBehaviour
             if (Instance.renderHidden != value)
             {
                 Instance.renderHidden = value;
-                onRenderHiddenUpdate?.Invoke();
+                Instance.m_onRenderHiddenUpdate?.Invoke();
             }
         }
     }
