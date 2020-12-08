@@ -66,7 +66,7 @@ Note: This project was created using **Unity 2019.4 LTS** version. Tested in **P
 **Pull requests** are welcome. For **major changes**, please open an issue first to discuss what you would like to change.
 
 Things that I might implement later:
-- Every time an agent in block mode does a refresh (tries to see if it should unblock), **SamplePosition** and **CalculatePath** are called. Both of these functions are **synchronous** and run on the **main thread**. I could divide them by the frames or make them run in separate threads to **avoid ms spikes**.
+- Every time an agent in block mode does a refresh (tries to see if it should unblock), **SamplePosition** and **CalculatePath** are called. Both of these functions are **synchronous** and run on the **main thread**. I could implement the new experimental **NavMeshQuery operations** (not yet fully complete) which can be can be executed inside **jobs**.
 - Import more methods and properties from the **NavMesh** and **NavMeshAgent** to the **CustomNavMesh** and the **CustomNavMeshAgent**, respectively.
 - Create custom versions for the **NavMeshComponents'** components.
 
