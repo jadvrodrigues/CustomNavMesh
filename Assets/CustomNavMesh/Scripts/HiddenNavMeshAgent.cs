@@ -24,6 +24,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     const float destSamplingModifier = 6.0f;
 
     bool subscribed; // used to avoid subscribing twice
+    Vector3 lastPosition;
 
     Vector3? destination;
     float timer; // count the time since agent changed mode or block mode is refreshed
@@ -138,23 +139,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         }
     }
 
-    Vector3? lastPosition;
-    Vector3? LastPosition
-    {
-        get
-        {
-            if(!lastPosition.HasValue)
-            {
-                lastPosition = transform.position;
-            }
-            return lastPosition;
-        }
-        set
-        {
-            lastPosition = value;
-        }
-    }
-
     float surfaceAgentRadius = 0.0f;
     float SurfaceAgentRadius
     {
@@ -264,6 +248,11 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         TrySubscribe();
     }
 
+    protected override void OnCustomStart()
+    {
+        lastPosition = transform.position;
+    }
+
     protected override void OnCustomUpdate()
     {
         Vector3 agentPos = CustomAgent.transform.position;
@@ -275,7 +264,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             transform.position.y,
             agentPos.z + translation.z);
 
-        float currentSpeed = Vector3.Distance(transform.position, LastPosition.Value) / Time.deltaTime;
+        float currentSpeed = Vector3.Distance(transform.position, lastPosition) / Time.deltaTime;
 
         if(currentSpeed < CustomAgent.UnblockSpeedThreshold) // if it did not surpass the speed threshold
         {
@@ -307,7 +296,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             }
         }
 
-        LastPosition = transform.position;
+        lastPosition = transform.position;
     }
 
     void SwitchToAgent()

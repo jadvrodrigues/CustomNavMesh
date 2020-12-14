@@ -9,6 +9,11 @@ using UnityEngine.SceneManagement;
 [DisallowMultipleComponent]
 public class CustomNavMeshAgent : CustomMonoBehaviour
 {
+    Transform savedParent;
+    Vector3 savedPosition;
+    Vector3 savedRotation;
+    Vector3 savedScale;
+
     /// <summary>
     /// A delegate which can be used to register callback methods to be invoked after the agent is changed.
     /// </summary>
@@ -333,59 +338,6 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         }
     }
 
-    Transform savedParent;
-
-    Vector3? savedPosition;
-    Vector3? SavedPosition
-    {
-        get
-        {
-            if (!savedPosition.HasValue)
-            {
-                savedPosition = transform.localPosition;
-            }
-            return savedPosition;
-        }
-        set
-        {
-            savedPosition = value;
-        }
-    }
-
-    Vector3? savedRotation;
-    Vector3? SavedRotation
-    {
-        get
-        {
-            if (!savedRotation.HasValue)
-            {
-                savedRotation = transform.localRotation.eulerAngles;
-            }
-            return savedRotation;
-        }
-        set
-        {
-            savedRotation = value;
-        }
-    }
-
-    Vector3? savedScale;
-    Vector3? SavedScale
-    {
-        get
-        {
-            if (!savedScale.HasValue)
-            {
-                savedScale = transform.localScale;
-            }
-            return savedScale;
-        }
-        set
-        {
-            savedScale = value;
-        }
-    }
-
     /// <summary>
     /// Apply relative movement to current position.
     /// If the agent has a path it will be adjusted.
@@ -458,15 +410,24 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
 #endif
     }
 
+    // hide Start method because this has to be triggered both inside and outside 
+    // of Play mode and the inherited OnCustomStart is only called in Play mode
+    new void Start()
+    {
+        savedPosition = transform.localPosition;
+        savedRotation = transform.localRotation.eulerAngles;
+        savedScale = transform.localScale;
+    }
+
     // hide Update method because this has to be triggered both inside and outside 
     // of Play mode and the inherited OnCustomUpdate is only called in Play mode
     new void Update()
     {
         if (transform.hasChanged)
         {
-            if (SavedPosition != transform.localPosition)
+            if (savedPosition != transform.localPosition)
             {
-                SavedPosition = transform.localPosition;
+                savedPosition = transform.localPosition;
                 onPositionChange?.Invoke();
             }
 
@@ -476,15 +437,15 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
                 onParentChange?.Invoke();
             }
 
-            if (SavedRotation != transform.localRotation.eulerAngles)
+            if (savedRotation != transform.localRotation.eulerAngles)
             {
-                SavedRotation = transform.localRotation.eulerAngles;
+                savedRotation = transform.localRotation.eulerAngles;
                 onRotationChange?.Invoke();
             }
 
-            if (SavedScale != transform.localScale)
+            if (savedScale != transform.localScale)
             {
-                SavedScale = transform.localScale;
+                savedScale = transform.localScale;
                 onScaleChange?.Invoke();
             }
 
