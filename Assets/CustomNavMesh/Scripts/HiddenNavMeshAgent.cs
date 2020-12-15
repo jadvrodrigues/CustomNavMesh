@@ -211,7 +211,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         var meshFilter = GetComponent<MeshFilter>();
         if (meshFilter == null)
         {
-            meshFilter = gameObject.AddComponent<MeshFilter>();
+            gameObject.AddComponent<MeshFilter>();
         }
 
         var meshRenderer = GetComponent<MeshRenderer>();
@@ -227,13 +227,11 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             obstacle = gameObject.AddComponent<NavMeshObstacle>();
             obstacle.carving = true;
         }
+        obstacle.enabled = false;
 
-        agent = GetComponent<NavMeshAgent>();
-        if (agent == null)
-        {
-            obstacle.enabled = false;
-            agent = gameObject.AddComponent<NavMeshAgent>();
-        }
+        // if the Agent property has to add a new NavMeshAgent, it has to be disabled 
+        // because it might be wrongly placed in the world if called from OnEnable
+        Agent.enabled = false;
     }
 
     protected override void OnCustomDisable()
@@ -245,6 +243,11 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     // of Play mode and the inherited OnCustomStart is only called in Play mode
     new void Start()
     {
+        if(Obstacle.enabled == false)
+        {
+            Agent.enabled = true;
+        }
+
         TrySubscribe();
     }
 
