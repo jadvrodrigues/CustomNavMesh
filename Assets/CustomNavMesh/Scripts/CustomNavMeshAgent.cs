@@ -501,9 +501,13 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
             var staticFlags = GameObjectUtility.GetStaticEditorFlags(gameObject);
             GameObjectUtility.SetStaticEditorFlags(hiddenObject, staticFlags);
 #else
-        hiddenObject.isStatic = gameObject.isStatic;
+            hiddenObject.isStatic = gameObject.isStatic;
 #endif
             HiddenAgent = hiddenObject.AddComponent<HiddenNavMeshAgent>();
+            // set dirty; otherwise, if it's part of a prefab instance and scripts are 
+            // reloaded, the hiddenAgentGameObject reference will be lost
+            EditorUtility.SetDirty(this);
+
             HiddenAgent.LinkWithCustomAgent(this);
         }
     }
