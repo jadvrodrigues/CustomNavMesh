@@ -504,9 +504,12 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
             hiddenObject.isStatic = gameObject.isStatic;
 #endif
             HiddenAgent = hiddenObject.AddComponent<HiddenNavMeshAgent>();
+
+#if UNITY_EDITOR
             // set dirty; otherwise, if it's part of a prefab instance and scripts are 
             // reloaded, the hiddenAgentGameObject reference will be lost
             EditorUtility.SetDirty(this);
+#endif
 
             HiddenAgent.LinkWithCustomAgent(this);
         }
