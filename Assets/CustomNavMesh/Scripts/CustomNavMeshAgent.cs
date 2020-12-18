@@ -218,6 +218,15 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_AvoidancePriority = value; NavMeshAgent.avoidancePriority = value; onChange?.Invoke(); }
     }
 
+    /// <summary>
+    /// Should the agent update the transform orientation?
+    /// </summary>
+    public bool UpdateRotation
+    {
+        get { return NavMeshAgent.updateRotation; }
+        set { NavMeshAgent.updateRotation = value; }
+    }
+
     [SerializeField] float m_TimeToBlock = 1.0f;
     /// <summary>
     /// Time in seconds needed for the hidden agent to switch from agent to obstacle, 
