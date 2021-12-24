@@ -104,8 +104,11 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     public float Height
     {
         get { return m_Height; }
-        set { m_Height = value; NavMeshAgent.height = value; 
-            onChange?.Invoke(); onAgentMeshChange?.Invoke(); onAgentPositionChange?.Invoke(); }
+        set
+        {
+            m_Height = value; NavMeshAgent.height = value;
+            onChange?.Invoke(); onAgentMeshChange?.Invoke(); onAgentPositionChange?.Invoke();
+        }
     }
 
     [SerializeField] int m_WalkableMask = -1;
@@ -354,7 +357,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     /// <param name="offset">The relative movement vector.</param>
     public void Move(Vector3 offset)
     {
-        NavMeshAgent.Move(offset);
+        if (NavMeshAgent.enabled) NavMeshAgent.Move(offset);
     }
 
     /// <summary>
@@ -363,7 +366,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     /// </summary>
     public void ResetPath()
     {
-        HiddenAgent.ResetPath();
+        if (HiddenAgent) HiddenAgent.ResetPath();
     }
 
     /// <summary>
@@ -383,6 +386,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     /// <returns>True if the destination was requested successfully, otherwise false.</returns>
     public bool SetDestination(Vector3 target)
     {
+        if (!HiddenAgent) return false;
         return HiddenAgent.SetDestination(target + CustomNavMesh.HiddenTranslation);
     }
 
@@ -461,10 +465,16 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
             transform.hasChanged = false;
         }
 
+#if UNITY_EDITOR
+        if (!Application.isPlaying) return;
+#endif
         if (HiddenAgent)
         {
-            NavMeshAgent.velocity = HiddenAgent.Velocity;
-        }        
+            // Just use the HiddenAgent's Velocity as a direction because its magnitude is inconsistent
+            float acceleration = (HiddenAgent.RemainingDistance > m_StoppingDistance ? 1 : -1) * m_Acceleration;
+            float magnitude = Mathf.Max(Mathf.Min(NavMeshAgent.velocity.magnitude + Time.deltaTime * acceleration, m_Speed), 0f);
+            NavMeshAgent.velocity = HiddenAgent.Velocity.normalized * magnitude;
+        }
     }
 
     protected override void OnCustomEnable()
@@ -540,7 +550,6 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
                     DestroyImmediate(HiddenAgent.gameObject);
                 }
             }
-            
         }
     }
 }

@@ -33,28 +33,14 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     /// Access the current velocity of the hidden agent component. Returns Vector3.zero 
     /// if it's currently in block mode or the agent is simply not moving. 
     /// </summary>
-    public Vector3 Velocity
-    {
-        get
-        {
-            if (Agent.enabled && CustomAgent != null)
-            {
-                float magnitude = Agent.velocity.magnitude;
-                if (magnitude <= CustomAgent.Speed)
-                {
-                    return Agent.velocity;
-                }
-                else
-                {
-                    return Agent.velocity / magnitude * CustomAgent.Speed;
-                }
-            }
-            else
-            {
-                return Vector3.zero;
-            }
-        }
-    }
+    public Vector3 Velocity => Agent.enabled ? Agent.velocity : Vector3.zero;
+
+    /// <summary>
+    /// The distance between the agent's position and the destination on the current path.
+    /// If the remaining distance is unknown or the hidden agent component is disabled 
+    /// then this will have a value of infinity.
+    /// </summary>
+    public float RemainingDistance => Agent.enabled ? Agent.remainingDistance : Mathf.Infinity;
 
     // Why serialize the game object? Because the CustomNavMeshAgent would reset to null.
     [SerializeField, HideInInspector] GameObject customAgentGameObject;
@@ -243,9 +229,10 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     // of Play mode and the inherited OnCustomStart is only called in Play mode
     new void Start()
     {
-        if(Obstacle.enabled == false)
+        if (Obstacle.enabled == false)
         {
             Agent.enabled = true;
+            UpdateMesh();
         }
 
         TrySubscribe();
@@ -269,11 +256,11 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 
         float currentSpeed = Vector3.Distance(transform.position, lastPosition) / Time.deltaTime;
 
-        if(currentSpeed < CustomAgent.UnblockSpeedThreshold) // if it did not surpass the speed threshold
+        if (currentSpeed < CustomAgent.UnblockSpeedThreshold) // if it did not surpass the speed threshold
         {
             timer += Time.deltaTime;
 
-            if(IsBlocking)
+            if (IsBlocking)
             {
                 if (timer >= CustomAgent.BlockRefreshInterval)
                 {
@@ -416,14 +403,14 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
             Undo.RecordObject(meshFilter, "");
 #endif
 
-            if(Agent.enabled)
+            if (Agent.enabled)
             {
                 Vector3 meshScale = new Vector3(radius * 2f, height / 2f, radius * 2f);
                 meshFilter.sharedMesh = PrimitiveType.Cylinder.CreateScaledMesh(meshScale);
             }
             else
             {
-                if(Obstacle.shape == NavMeshObstacleShape.Box)
+                if (Obstacle.shape == NavMeshObstacleShape.Box)
                 {
                     Vector3 meshScale = new Vector3(radius * 2f, height, radius * 2f);
                     meshFilter.sharedMesh = PrimitiveType.Cube.CreateScaledMesh(meshScale);
