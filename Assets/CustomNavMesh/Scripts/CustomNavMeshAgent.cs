@@ -358,6 +358,10 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     public void Move(Vector3 offset)
     {
         if (NavMeshAgent.enabled) NavMeshAgent.Move(offset);
+
+        // update hidden position now (instead of waiting for the next frame)
+        // so the agent's path can get recalculated sooner
+        if (HiddenAgent) HiddenAgent.transform.position = transform.position + CustomNavMesh.HiddenTranslation;
     }
 
     /// <summary>
@@ -370,13 +374,19 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     }
 
     /// <summary>
-    /// Warps agent to the provided position.
+    /// Warps agent to the provided position. If the agent has a path it will not be reset.
     /// </summary>
     /// <param name="newPosition">New position to warp the agent to.</param>
     /// <returns>True if agent is successfully warped, otherwise false.</returns>
     public bool Warp(Vector3 newPosition)
     {
-        return NavMeshAgent.Warp(newPosition);
+        bool result = NavMeshAgent.Warp(newPosition);
+
+        // update hidden position now (instead of waiting for the next frame)
+        // so the agent's path can get recalculated sooner
+        if (HiddenAgent) HiddenAgent.transform.position = transform.position + CustomNavMesh.HiddenTranslation;
+
+        return result;
     }
 
     /// <summary>
