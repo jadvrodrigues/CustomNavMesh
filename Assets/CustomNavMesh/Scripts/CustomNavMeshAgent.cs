@@ -131,6 +131,23 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_Speed = value; NavMeshAgent.speed = value; onChange?.Invoke(); }
     }
 
+    /// <summary>
+    /// Get current velocity of navmeshagent
+    /// </summary>
+    public Vector3 Velocity
+    {
+        get { return NavMeshAgent.velocity; }
+    }
+
+    /// <summary>
+    /// Stop or resume condition of the navmeshagent
+    /// </summary>
+    public bool IsStopped
+    {
+        get { return NavMeshAgent.isStopped; }
+        set { NavMeshAgent.isStopped = value; onChange?.Invoke(); }
+    }
+
     [SerializeField] float m_Acceleration = 8.0f;
     /// <summary>
     /// The maximum acceleration of an agent as it follows a path, given in units / sec^2.
