@@ -1,8 +1,6 @@
 # Custom Nav Mesh
 
-Alternative to Unity's NavMesh system where the **agents avoid the other non-moving agents** in their pathing. It uses the official navigation system, but you have to use its components instead. Compatible with **NavMeshComponents**. 
-
-**Disclaimer:** This tool has not been thoroughly tested.
+Alternative to Unity's NavMesh system where the **agents avoid the other non-moving agents** in their pathing. It uses the official navigation system, but you have to use its components instead. Compatible with **NavMeshComponents**.
 
 ## How it works
 
@@ -12,7 +10,7 @@ Unity's NavMeshAgent             |  CustomNavMeshAgent
 :-------------------------:|:-------------------------:
 ![](Assets/Examples/GIFs/1_before.gif)  |  ![](Assets/Examples/GIFs/1_after.gif)
 
-> **1. Set the destination** to the blue target.
+> **1. Setting the destination** to the blue target.
 
 **What if a moving agent collides against a stopped agent that's currently in obstacle mode**? By default, it wouldn't be able to push it. However, by:
 
@@ -24,17 +22,17 @@ Unity's NavMeshAgent             |  CustomNavMeshAgent
 
 > **2.** The duplicated **NavMesh** components. The **hidden** components are on the **right** side.
 
-**You can** have agents **push** the **other agents**. This is how the **CustomNavMesh** system works under the hood. For it to work, you must use its **custom components**, which are **identical to the original ones**, making the transition **seamless**.
+**You can** have agents **push** the **other agents**. For the **CustomNavMesh** system to work, you must use its **custom components**, which are **identical to the original ones**, making the transition seamless.
 
 NavMeshAgent vs NavMeshObstacle "Agents"            |  CustomNavMeshAgents
 :-------------------------:|:-------------------------:
 ![](Assets/Examples/GIFs/3_before.gif)  |  ![](Assets/Examples/GIFs/3_after.gif)
 
-> **3. Overlapping** agents by throwing one against the others. The **agents** are red and the **obstacles** blue. This is **just a showcase**. If you're trying to do something similar, you should use **colliders** and **physics** instead since this system is only supposed to **resolve agent overlap**.
+> **3. Overlapping** agents by throwing one against the others. The **agents** are green and the **obstacles** blue.
 
 **Why not** just **switch** the agents back to **NavMeshAgent** instead? That wouldn't work because switching from **NavMeshObstacle** to **NavMeshAgent** isn't instant — it would take at least two frames.
 
-**What are the disadvantages?** Every **NavMesh** component is duplicated, which makes it less performant. However, It shouldn't be noticeable unless you have a lot of agents.
+**What are the disadvantages?** Every **NavMesh** component is duplicated, which makes it less performant. However, it shouldn't be noticeable in most situations.
 
 ## Custom classes
 
@@ -59,18 +57,16 @@ NavMeshAgent vs NavMeshObstacle "Agents"            |  CustomNavMeshAgents
 
 The **scenes** used for the **GIFs** are available in the `Assets/Examples` folder. Just hit the **Space Bar** in play mode to test it.
 
-Note: This project was created using **Unity 2019.4 LTS** version. Tested in **PC Standalone**, **Android**, and **WebGL**.
+Note: This project is using the **Unity 2021.3 LTS** version. Tested in **PC Standalone**, **Android**, and **WebGL**.
 
-## Contributing
-
-**Pull requests** are welcome. For **major changes**, please open an issue first to discuss what you would like to change.
+## Final thoughts
 
 Things that I might implement later:
-- Every time an agent in block mode does a refresh (tries to see if it should unblock), **SamplePosition** and **CalculatePath** are called. Both of these functions are **synchronous** and run on the **main thread**. I could implement the new experimental **NavMeshQuery operations** (not yet fully complete) which can be can be executed inside **jobs**.
-- Import more methods and properties from the **NavMesh** and **NavMeshAgent** to the **CustomNavMesh** and the **CustomNavMeshAgent**, respectively.
-- Create custom versions for the **NavMeshComponents'** components.
+- Every time an agent in block mode does a refresh (tries to see if it should unblock), **SamplePosition** and **CalculatePath** are called. Both of these functions are **synchronous** and run on the **main thread**. I could implement the new experimental **NavMeshQuery operations** (not yet fully complete) which can be executed using the new **job system**.
+- Import more methods and properties from the original **NavMesh** components.
+- Create custom versions of the **NavMeshComponents'** components.
 
-If you **need help** implementing this to your project or have any **questions**, just [message me](https://forum.unity.com/members/jadvrodrigues.4503760/) and I'll try to help. I'm also interested in any **tips** or **suggestions** you may have, cheers!
+If you **need help** adding this to your project or have any **questions**, just [message me](https://forum.unity.com/members/jadvrodrigues.4503760/) and I'll try to help. I'm also interested in any **tips** or **suggestions** you may have, cheers!
 
 
 

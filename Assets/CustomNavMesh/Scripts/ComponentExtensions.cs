@@ -2,10 +2,10 @@
 using UnityEngine;
 
 /// <summary>
-/// Helper class with methods to retrieve immediate children components. Immediate children 
+/// Utility class with methods to retrieve immediate children components. Immediate children 
 /// are the ones one level down their parent's level in the hierarchy.
 /// </summary>
-public static class ComponentHelper
+public static class ComponentExtensions
 {
     /// <summary>
     /// Returns the component of Type type in the GameObject or any of its immmediate children.

@@ -153,7 +153,7 @@ public class CustomNavMeshSurface : CustomMonoBehaviour
         {
 #if UNITY_EDITOR
             if (!PrefabUtility.IsPartOfAnyPrefab(this) ||
-                UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() != null)
+                UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() != null)
             {
                 if (HiddenSurface != null)
                 {

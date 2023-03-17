@@ -2,10 +2,6 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-#if UNITY_EDITOR
-using UnityEditor.Experimental.SceneManagement;
-#endif
-
 /// <summary>
 /// An obstacle for CustomNavMeshAgents to avoid.
 /// </summary>
@@ -240,7 +236,7 @@ public class CustomNavMeshObstacle : CustomMonoBehaviour
 #if UNITY_EDITOR
             Undo.DestroyObjectImmediate(NavMeshObstacle);
 
-            if (!PrefabUtility.IsPartOfAnyPrefab(this) || PrefabStageUtility.GetCurrentPrefabStage() != null)
+            if (!PrefabUtility.IsPartOfAnyPrefab(this) || UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() != null)
             {
                 if (HiddenObstacle != null)
                 {

@@ -2,7 +2,7 @@
 using UnityEditor;
 
 #if UNITY_EDITOR
-using UnityEditor.Experimental.SceneManagement;
+
 #endif
 
 /// <summary>
@@ -90,7 +90,7 @@ public class CustomMonoBehaviour : MonoBehaviour
         if (Time.frameCount == 0) return;
 
         // ignore when this is called for simply leaving the prefab mode
-        if (PrefabStageUtility.GetCurrentPrefabStage() != null && !gameObject.activeInHierarchy) return;
+        if (UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage() != null && !gameObject.activeInHierarchy) return;
 #endif
         OnCustomDestroy();
     }

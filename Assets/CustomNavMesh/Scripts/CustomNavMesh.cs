@@ -17,7 +17,7 @@ public class CustomNavMesh : MonoBehaviour
 
                 if (instance == null)
                 {
-                    if(!SceneManager.GetActiveScene().isLoaded) return null; // null if leaving the scene
+                    if (!SceneManager.GetActiveScene().isLoaded) return null; // null if leaving the scene
 
                     var singletonObject = new GameObject();
                     instance = singletonObject.AddComponent<CustomNavMesh>();
@@ -224,7 +224,7 @@ public class CustomNavMesh : MonoBehaviour
 
         // Disable all custom components (surfaces, obstacles and agents)
         Debug.LogWarning("CustomNavMesh singleton instance is being destroyed. Disabling all dependant components.");
-        foreach(CustomNavMeshSurface surface in FindObjectsOfType(typeof(CustomNavMeshSurface)))
+        foreach (CustomNavMeshSurface surface in FindObjectsOfType(typeof(CustomNavMeshSurface)))
         {
             surface.enabled = false;
         }

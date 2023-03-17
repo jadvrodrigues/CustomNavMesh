@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -33,7 +32,15 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     /// Access the current velocity of the hidden agent component. Returns Vector3.zero 
     /// if it's currently in block mode or the agent is simply not moving. 
     /// </summary>
-    public Vector3 Velocity => Agent.enabled ? Agent.velocity : Vector3.zero;
+    public Vector3 Velocity 
+    {
+        get => Agent.enabled ? Agent.velocity : Vector3.zero;
+        set
+        {
+            if(value.magnitude > 0) SwitchToAgent();
+            Agent.velocity = value;
+        }
+    }
 
     /// <summary>
     /// The distance between the agent's position and the destination on the current path.
@@ -229,7 +236,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     // of Play mode and the inherited OnCustomStart is only called in Play mode
     new void Start()
     {
-        if (Obstacle.enabled == false)
+        if(Obstacle.enabled == false)
         {
             Agent.enabled = true;
             UpdateMesh();
@@ -248,7 +255,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         Vector3 agentPos = CustomAgent.transform.position;
         Vector3 translation = CustomNavMesh.HiddenTranslation;
 
-        // why not call UpdatePosition? it is slower, does unnecessary calculations
         transform.position = new Vector3(
             agentPos.x + translation.x,
             transform.position.y,
@@ -256,11 +262,11 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 
         float currentSpeed = Vector3.Distance(transform.position, lastPosition) / Time.deltaTime;
 
-        if (currentSpeed < CustomAgent.UnblockSpeedThreshold) // if it did not surpass the speed threshold
+        if(currentSpeed < CustomAgent.UnblockSpeedThreshold) // if it did not surpass the speed threshold
         {
             timer += Time.deltaTime;
 
-            if (IsBlocking)
+            if(IsBlocking)
             {
                 if (timer >= CustomAgent.BlockRefreshInterval)
                 {
@@ -360,7 +366,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 #endif
             // Update my NavMeshAgent
             CustomNavMeshAgent.TransferAgentValues(CustomAgent, Agent);
-            Agent.baseOffset = CustomAgent.Height / 2.0f; // keep mesh centered
+            Agent.baseOffset = CustomAgent.BaseOffset;
 
 #if UNITY_EDITOR         
             Undo.RecordObject(Obstacle, "");
@@ -382,6 +388,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 #endif
             var height = CustomAgent.Height;
             var radius = CustomAgent.Radius;
+            var baseOffset = CustomAgent.BaseOffset;
 
             var scale = CustomAgent.transform.localScale;
             var realHeight = height * Mathf.Abs(scale.y);
@@ -399,28 +406,45 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
                 Obstacle.radius = radius;
             }
 
+            float offset = height / 2f - baseOffset;
+            if (offset != 0) Obstacle.center = new(0f, offset, 0f);
+
 #if UNITY_EDITOR
-            Undo.RecordObject(meshFilter, "");
+                Undo.RecordObject(meshFilter, "");
 #endif
 
-            if (Agent.enabled)
+            Mesh mesh;
+            if(Agent.enabled)
             {
                 Vector3 meshScale = new Vector3(radius * 2f, height / 2f, radius * 2f);
-                meshFilter.sharedMesh = PrimitiveType.Cylinder.CreateScaledMesh(meshScale);
+                mesh = PrimitiveType.Cylinder.CreateScaledMesh(meshScale);
             }
             else
             {
-                if (Obstacle.shape == NavMeshObstacleShape.Box)
+                if(Obstacle.shape == NavMeshObstacleShape.Box)
                 {
                     Vector3 meshScale = new Vector3(radius * 2f, height, radius * 2f);
-                    meshFilter.sharedMesh = PrimitiveType.Cube.CreateScaledMesh(meshScale);
+                    mesh = PrimitiveType.Cube.CreateScaledMesh(meshScale);
                 }
                 else
                 {
                     Vector3 meshScale = new Vector3(radius * 2f, height / 2f, radius * 2f);
-                    meshFilter.sharedMesh = PrimitiveType.Capsule.CreateScaledMesh(meshScale);
+                    mesh = PrimitiveType.Capsule.CreateScaledMesh(meshScale);
                 }
             }
+
+            // The mesh is centered by default, so translate it if the agent's center isn't on top of the pivot
+            if(offset != 0)
+            {
+                var vertices = mesh.vertices;
+                for (int i = 0; i < vertices.Length; i++) 
+                    vertices[i].y += offset;
+
+                mesh.vertices = vertices;
+                mesh.RecalculateBounds();
+            }
+
+            meshFilter.sharedMesh = mesh;
         }
     }
 
@@ -454,9 +478,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 #if UNITY_EDITOR
             Undo.RecordObject(transform, "");
 #endif
-            transform.position = customAgent.transform.position + CustomNavMesh.HiddenTranslation +
-                (customAgent.Height / 2.0f * Mathf.Sign(customAgent.transform.localScale.y) - customAgent.BaseOffset) *
-                Vector3.up * customAgent.transform.localScale.y;
+            transform.position = customAgent.transform.position + CustomNavMesh.HiddenTranslation;
         }
     }
 

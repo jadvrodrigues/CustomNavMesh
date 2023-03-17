@@ -43,7 +43,7 @@ public static class PrimitiveMeshes
     /// <returns></returns>
     public static Mesh GetMesh(this PrimitiveType type)
     {
-        switch(type)
+        switch (type)
         {
             case PrimitiveType.Sphere:
                 return Sphere;

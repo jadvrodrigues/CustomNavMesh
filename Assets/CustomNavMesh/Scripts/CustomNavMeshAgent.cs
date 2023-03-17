@@ -131,6 +131,12 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_Speed = value; NavMeshAgent.speed = value; onChange?.Invoke(); }
     }
 
+    public Vector3 Velocity
+    {
+        get { return HiddenAgent ? HiddenAgent.Velocity : Vector3.zero; }
+        set { if (HiddenAgent) HiddenAgent.Velocity = value; }
+    }
+
     [SerializeField] float m_Acceleration = 8.0f;
     /// <summary>
     /// The maximum acceleration of an agent as it follows a path, given in units / sec^2.
@@ -370,7 +376,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     /// </summary>
     public void ResetPath()
     {
-        if (HiddenAgent) HiddenAgent.ResetPath();
+        if(HiddenAgent) HiddenAgent.ResetPath();
     }
 
     /// <summary>
@@ -478,12 +484,10 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
 #if UNITY_EDITOR
         if (!Application.isPlaying) return;
 #endif
-        if (HiddenAgent)
+        if (HiddenAgent && Time.deltaTime != 0)
         {
-            // Just use the HiddenAgent's Velocity as a direction because its magnitude is inconsistent
-            float acceleration = (HiddenAgent.RemainingDistance > m_StoppingDistance ? 1 : -1) * m_Acceleration;
-            float magnitude = Mathf.Max(Mathf.Min(NavMeshAgent.velocity.magnitude + Time.deltaTime * acceleration, m_Speed), 0f);
-            NavMeshAgent.velocity = HiddenAgent.Velocity.normalized * magnitude;
+            Vector3 desiredVelocity = Vector3.ClampMagnitude(HiddenAgent.Velocity, Speed);
+            NavMeshAgent.Move(desiredVelocity * Time.deltaTime);
         }
     }
 
@@ -508,6 +512,9 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
 
     protected override void OnCustomDestroy()
     {
+        // in case OnDisable wasn't called (e.g. destroyed during the application's first frame)
+        TryDestroyingHiddenAgent();
+
         if (gameObject.activeInHierarchy) // used to avoid destroying things twice, when gameObject is destroyed
         {
 #if UNITY_EDITOR

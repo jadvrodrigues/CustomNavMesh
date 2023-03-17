@@ -43,7 +43,6 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
                 {
                     // update existing nav mesh obstacle
                     CustomNavMeshObstacle.TransferObstacleValues(CustomObstacle, obstacle);
-                    obstacle.center = Vector3.zero; // keep mesh centered
                 }
             }
             return obstacle;
@@ -117,8 +116,7 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
             if (CustomObstacle != null)
             {
                 transform.parent = CustomObstacle.transform; // prevent from being changed
-
-                transform.position = CalculateCenterTranslation() + CustomObstacle.transform.position + CustomNavMesh.HiddenTranslation;
+                transform.position = CustomObstacle.transform.position + CustomNavMesh.HiddenTranslation;
             }
 
             transform.hasChanged = false;
@@ -140,7 +138,6 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
             Undo.RecordObject(Obstacle, "");
 #endif
             CustomNavMeshObstacle.TransferObstacleValues(CustomObstacle, Obstacle);
-            Obstacle.center = Vector3.zero; // keep mesh centered
         }
     }
 
@@ -152,17 +149,33 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
 #if UNITY_EDITOR
             Undo.RecordObject(meshFilter, "");
 #endif
+            Mesh mesh = null;
             switch (Obstacle.shape)
             {
                 case NavMeshObstacleShape.Box:
-                    meshFilter.sharedMesh = PrimitiveType.Cube.CreateScaledMesh(Obstacle.size);
+                    mesh = PrimitiveType.Cube.CreateScaledMesh(Obstacle.size);
                     break;
                 case NavMeshObstacleShape.Capsule:
                     float radius = Obstacle.radius;
                     float height = Obstacle.height;
                     Vector3 scale = new Vector3(radius * 2f, height, radius * 2f);
-                    meshFilter.sharedMesh = PrimitiveType.Capsule.CreateScaledMesh(scale);
+                    mesh = PrimitiveType.Capsule.CreateScaledMesh(scale);
                     break;
+            }
+
+            if (mesh != null)
+            {
+                if (Obstacle.center != Vector3.zero)
+                {
+                    var vertices = mesh.vertices;
+                    for (int i = 0; i < vertices.Length; i++)
+                        vertices[i] += Obstacle.center;
+
+                    mesh.vertices = vertices;
+                    mesh.RecalculateBounds();
+                }
+
+                meshFilter.sharedMesh = mesh;
             }
         }
     }
@@ -186,7 +199,7 @@ public class HiddenNavMeshObstacle : CustomMonoBehaviour
 #if UNITY_EDITOR
             Undo.RecordObject(transform, "");
 #endif
-            transform.position = CalculateCenterTranslation() + CustomObstacle.transform.position + CustomNavMesh.HiddenTranslation;
+            transform.position = CustomObstacle.transform.position + CustomNavMesh.HiddenTranslation;
             transform.hasChanged = false;
         }
     }
