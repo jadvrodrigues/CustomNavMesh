@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.SceneManagement;
@@ -497,10 +498,25 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         // the custom inspector will only hide after a split second so update the flags now 
         NavMeshAgent.hideFlags = HideFlags.HideInInspector;
         NavMeshAgent.enabled = true;
-
+        
         TryCreatingHiddenAgent();
 
         savedParent = transform.parent;
+
+        // When leaving the prefab isolation mode, the agent should be disabled and
+        // enabled so that the hidden agent can be spawned in the scene
+        PrefabStage.prefabStageClosing -= OnPrefabStageClosing;
+        PrefabStage.prefabStageClosing += OnPrefabStageClosing;
+
+        void OnPrefabStageClosing(PrefabStage prefabStage)
+        {
+            GameObject sceneObject = prefabStage.openedFromInstanceObject;
+            if (sceneObject != null)
+            {
+                sceneObject.SetActive(false);
+                sceneObject.SetActive(true);
+            }
+        }
     }
 
     protected override void OnCustomDisable()
@@ -546,7 +562,6 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
             // reloaded, the hiddenAgentGameObject reference will be lost
             EditorUtility.SetDirty(this);
 #endif
-
             HiddenAgent.LinkWithCustomAgent(this);
         }
     }
