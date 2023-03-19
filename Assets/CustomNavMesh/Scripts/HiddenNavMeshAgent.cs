@@ -361,16 +361,10 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     {
         if (CustomAgent != null && Agent != null)
         {
-#if UNITY_EDITOR
-            Undo.RecordObject(Agent, "");
-#endif
             // Update my NavMeshAgent
             CustomNavMeshAgent.TransferAgentValues(CustomAgent, Agent);
             Agent.baseOffset = CustomAgent.BaseOffset;
 
-#if UNITY_EDITOR         
-            Undo.RecordObject(Obstacle, "");
-#endif
             // Update my NavMeshObstacle
             Obstacle.carvingMoveThreshold = CustomAgent.CarvingMoveThreshold;
             Obstacle.carvingTimeToStationary = CustomAgent.CarvingTimeToStationary;
@@ -383,9 +377,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         var meshFilter = GetComponent<MeshFilter>();
         if (meshFilter != null && CustomAgent != null)
         {
-#if UNITY_EDITOR
-            Undo.RecordObject(Obstacle, "");
-#endif
             var height = CustomAgent.Height;
             var radius = CustomAgent.Radius;
             var baseOffset = CustomAgent.BaseOffset;
@@ -408,10 +399,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 
             float offset = height / 2f - baseOffset;
             if (offset != 0) Obstacle.center = new(0f, offset, 0f);
-
-#if UNITY_EDITOR
-                Undo.RecordObject(meshFilter, "");
-#endif
 
             Mesh mesh;
             if(Agent.enabled)
@@ -464,9 +451,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     {
         if (CustomAgent != null)
         {
-#if UNITY_EDITOR
-            Undo.RecordObject(transform, "");
-#endif
             transform.parent = CustomAgent.transform.parent;
         }
     }
@@ -475,9 +459,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     {
         if (CustomAgent != null)
         {
-#if UNITY_EDITOR
-            Undo.RecordObject(transform, "");
-#endif
             transform.position = customAgent.transform.position + CustomNavMesh.HiddenTranslation;
         }
     }
@@ -486,9 +467,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     {
         if (CustomAgent != null)
         {
-#if UNITY_EDITOR
-            Undo.RecordObject(transform, "");
-#endif
             transform.rotation = CustomAgent.transform.rotation;
         }
     }
@@ -498,9 +476,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     {
         if (CustomAgent != null)
         {
-#if UNITY_EDITOR
-            Undo.RecordObject(transform, "");
-#endif
             var customTransform = CustomAgent.transform;
 
             UpdatePosition();

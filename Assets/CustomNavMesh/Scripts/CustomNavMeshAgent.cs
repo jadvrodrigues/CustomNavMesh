@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.Collections;
+using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.AI;
@@ -25,20 +26,20 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     public event OnChange onChange;
 
     /// <summary>
-    /// A delegate which can be used to register callback methods to be invoked after the agent's radius or height is changed.
+    /// A delegate which can be used to register callback methods to be invoked after the agent's radius, height or base offset is changed.
     /// </summary>
     public delegate void OnAgentMeshChange();
     /// <summary>
-    /// Subscribe a function to be called after the agent's radius or height is changed. Note: always invoked after onChange.
+    /// Subscribe a function to be called after the agent's radius, height or base offset is changed. Note: always invoked after onChange.
     /// </summary>
     public event OnAgentMeshChange onAgentMeshChange;
 
     /// <summary>
-    /// A delegate which can be used to register callback methods to be invoked after the agent's height or baseOffset is changed.
+    /// A delegate which can be used to register callback methods to be invoked after the agent's position is changed.
     /// </summary>
     public delegate void OnAgentPositionChange();
     /// <summary>
-    /// Subscribe a function to be called after the agent's height or baseOffset is changed. Note: always invoked after onChange.
+    /// Subscribe a function to be called after the agent's position is changed. Note: always invoked after onChange.
     /// </summary>
     public event OnAgentPositionChange onAgentPositionChange;
 
@@ -205,7 +206,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     public float BaseOffset
     {
         get { return m_BaseOffset; }
-        set { m_BaseOffset = value; NavMeshAgent.baseOffset = value; onChange?.Invoke(); onAgentPositionChange?.Invoke(); }
+        set { m_BaseOffset = value; NavMeshAgent.baseOffset = value; onChange?.Invoke(); onAgentMeshChange?.Invoke(); }
     }
 
     [SerializeField] ObstacleAvoidanceType m_ObstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
@@ -543,6 +544,9 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
 
     void TryCreatingHiddenAgent()
     {
+        // do not create the hidden agent in prefab mode
+        if (PrefabStageUtility.GetCurrentPrefabStage() != null) return;
+
         if (HiddenAgent == null || !HiddenAgent.IsLinkedWith(this))
         {
             var hiddenObject = new GameObject("(Hidden) " + name);
