@@ -23,10 +23,14 @@ public class CustomNavMeshAgentInspector : Editor
     SerializedProperty m_ObstacleAvoidanceType;
     SerializedProperty m_AvoidancePriority;
 
+    SerializedProperty m_BlockAfterDuration;
     SerializedProperty m_TimeToBlock;
+    SerializedProperty m_BlockSpeedThreshold;
+    SerializedProperty m_UnblockAfterDuration;
+    SerializedProperty m_TimeToUnblock;
+    SerializedProperty m_DistanceReductionThreshold;
+    SerializedProperty m_UnblockAtSpeed;
     SerializedProperty m_UnblockSpeedThreshold;
-    SerializedProperty m_BlockRefreshInterval;
-    SerializedProperty m_MinDistanceBoostToStopBlock;
     SerializedProperty m_CarvingMoveThreshold;
     SerializedProperty m_TimeToStationary;
     SerializedProperty m_CarveOnlyStationary;
@@ -45,6 +49,7 @@ public class CustomNavMeshAgentInspector : Editor
         public readonly GUIContent m_AgentAvoidanceHeader = EditorGUIUtility.TrTextContent("Obstacle Avoidance");
         public readonly GUIContent m_AgentPathFindingHeader = EditorGUIUtility.TrTextContent("Path Finding");
         public readonly GUIContent m_AgentPathBlockingHeader = EditorGUIUtility.TrTextContent("Blocking");
+        public readonly GUIContent m_AgentPathUnblockingHeader = EditorGUIUtility.TrTextContent("Unblocking");
     }
 
     static Styles s_Styles;
@@ -74,11 +79,15 @@ public class CustomNavMeshAgentInspector : Editor
         m_ObstacleAvoidanceType = serializedObject.FindProperty("m_ObstacleAvoidanceType");
         m_AvoidancePriority = serializedObject.FindProperty("m_AvoidancePriority");
 
+        m_BlockAfterDuration = serializedObject.FindProperty("m_BlockAfterDuration");
         m_TimeToBlock = serializedObject.FindProperty("m_TimeToBlock");
+        m_BlockSpeedThreshold = serializedObject.FindProperty("m_BlockSpeedThreshold");
+        m_UnblockAfterDuration = serializedObject.FindProperty("m_UnblockAfterDuration");
+        m_TimeToUnblock = serializedObject.FindProperty("m_TimeToUnblock");
+        m_DistanceReductionThreshold = serializedObject.FindProperty("m_DistanceReductionThreshold");
+        m_UnblockAtSpeed = serializedObject.FindProperty("m_UnblockAtSpeed");
         m_UnblockSpeedThreshold = serializedObject.FindProperty("m_UnblockSpeedThreshold");
-        m_BlockRefreshInterval = serializedObject.FindProperty("m_BlockRefreshInterval");
-        m_MinDistanceBoostToStopBlock = serializedObject.FindProperty("m_MinDistanceBoostToStopBlock");
-        m_CarvingMoveThreshold = serializedObject.FindProperty("m_MoveThreshold");
+        m_CarvingMoveThreshold = serializedObject.FindProperty("m_CarvingMoveThreshold");
         m_TimeToStationary = serializedObject.FindProperty("m_TimeToStationary");
         m_CarveOnlyStationary = serializedObject.FindProperty("m_CarveOnlyStationary");
     }
@@ -349,10 +358,32 @@ public class CustomNavMeshAgentInspector : Editor
 
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(
+            m_BlockAfterDuration,
+            new GUIContent("Block after Duration",
+            "Should the hidden agent switch from agent to obstacle if it hasn't surpassed the " +
+            "BlockSpeedTreshold for TimeToBlock seconds?")
+            );
+        if (EditorGUI.EndChangeCheck())
+        {
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Block After Duration");
+                agent.BlockAfterDuration = m_BlockAfterDuration.boolValue;
+            }
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        bool guiEnabled = GUI.enabled;
+        GUI.enabled = m_BlockAfterDuration.boolValue;
+        EditorGUI.indentLevel++;
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(
             m_TimeToBlock, 
             new GUIContent("Time to Block", 
             "Time in seconds needed for the hidden agent to switch from agent to obstacle, " +
-            "assuming it hasn't surpassed the UnblockSpeedTreshold during the interval.")
+            "assuming it hasn't surpassed the BlockSpeedTreshold during the interval.")
             );
 
         if (EditorGUI.EndChangeCheck())
@@ -370,66 +401,25 @@ public class CustomNavMeshAgentInspector : Editor
 
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(
-            m_UnblockSpeedThreshold,
-            new GUIContent("Unblock Speed Threshold",
-            "Speed at which the hidden agent turns into an agent again " +
-            "if it is currently in obstacle mode.")
+            m_BlockSpeedThreshold,
+            new GUIContent("Block Speed Threshold",
+            "Speed the agent can't surpass for TimeToBlock seconds for the hidden " +
+            "agent to turn into an obstacle.")
             );
         if (EditorGUI.EndChangeCheck())
         {
-            if (m_UnblockSpeedThreshold.floatValue < 0.0f) m_UnblockSpeedThreshold.floatValue = 0.0f;
+            if (m_BlockSpeedThreshold.floatValue < 0.0f) m_BlockSpeedThreshold.floatValue = 0.0f;
 
             foreach (var agent in Agents)
             {
-                Undo.RecordObject(agent, "Changed Agent Unblock Speed Threshold");
-                agent.UnblockSpeedThreshold = m_UnblockSpeedThreshold.floatValue;
+                Undo.RecordObject(agent, "Changed Agent Block Speed Threshold");
+                agent.BlockSpeedThreshold = m_BlockSpeedThreshold.floatValue;
             }
 
             serializedObject.ApplyModifiedProperties();
         }
 
-        EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(
-            m_BlockRefreshInterval,
-            new GUIContent("Block Refresh Interval",
-            "Time in seconds needed for the hidden agent to check if it should change " +
-            "to agent again, assuming it is currently in obstacle mode.")
-            );
-        if (EditorGUI.EndChangeCheck())
-        {
-            if (m_BlockRefreshInterval.floatValue < 0.0f) m_BlockRefreshInterval.floatValue = 0.0f;
-
-            foreach (var agent in Agents)
-            {
-                Undo.RecordObject(agent, "Changed Agent Block Refresh Interval");
-                agent.BlockRefreshInterval = m_BlockRefreshInterval.floatValue;
-            }
-
-            serializedObject.ApplyModifiedProperties();
-        }
-
-        EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(
-            m_MinDistanceBoostToStopBlock,
-            new GUIContent("Min Distance Boost to Stop Block",
-            "In the block refresh (when \"blocking\" obstacle agent checks if it should change to a moving " +
-            "agent), this is the minimum distance the newly calculated reacheable position must be closer " +
-            "to the destination (comparing with the current position) so it can change to agent.")
-            );
-
-        if (EditorGUI.EndChangeCheck())
-        {
-            if (m_MinDistanceBoostToStopBlock.floatValue < 0.0f) m_MinDistanceBoostToStopBlock.floatValue = 0.0f;
-
-            foreach (var agent in Agents)
-            {
-                Undo.RecordObject(agent, "Changed Agent How Much Closer To Leave Block Mode");
-                agent.MinDistanceBoostToStopBlock = m_MinDistanceBoostToStopBlock.floatValue;
-            }
-
-            serializedObject.ApplyModifiedProperties();
-        }
-
+        GUI.enabled = guiEnabled;
         EditorGUI.indentLevel--;
 
         EditorGUILayout.LabelField("Obstacle Carving");
@@ -478,6 +468,123 @@ public class CustomNavMeshAgentInspector : Editor
             serializedObject.ApplyModifiedProperties();
         }
 
+        EditorGUI.indentLevel--;
+
+        EditorGUI.indentLevel--;
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField(s_Styles.m_AgentPathUnblockingHeader, EditorStyles.boldLabel);
+
+        EditorGUI.indentLevel++;
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(
+            m_UnblockAfterDuration,
+            new GUIContent("Unblock after Duration",
+            "Should the hidden agent try to find a new path every TimeToUnblock seconds, and switch from obstacle to agent " +
+            "when it finds one which reduces its distance to the destination by DistanceReductionThreshold?")
+            );
+        if (EditorGUI.EndChangeCheck())
+        {
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Unblock After Duration");
+                agent.UnblockAfterDuration = m_UnblockAfterDuration.boolValue;
+            }
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        GUI.enabled = m_UnblockAfterDuration.boolValue;
+        EditorGUI.indentLevel++;
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(
+            m_TimeToUnblock,
+            new GUIContent("Time to Unblock",
+            "Time in seconds needed for the hidden agent to check if it should change to " +
+            "agent again, assuming it is currently in obstacle mode.")
+            );
+
+        if (EditorGUI.EndChangeCheck())
+        {
+            if (m_TimeToUnblock.floatValue < 0.0f) m_TimeToUnblock.floatValue = 0.0f;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Time To Unblock");
+                agent.TimeToUnblock = m_TimeToUnblock.floatValue;
+            }
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(
+            m_DistanceReductionThreshold,
+            new GUIContent("Distance Reduction Threshold",
+            "When the agent checks if it should stop blocking, this is the minimum distance the newly calculated reacheable position " +
+            "must be closer to the destination for it to change into an agent again.")
+            );
+
+        if (EditorGUI.EndChangeCheck())
+        {
+            if (m_DistanceReductionThreshold.floatValue < 0.0f) m_DistanceReductionThreshold.floatValue = 0.0f;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Distance Reduction Threshold");
+                agent.DistanceReductionThreshold = m_DistanceReductionThreshold.floatValue;
+            }
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        GUI.enabled = guiEnabled;
+        EditorGUI.indentLevel--;
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(
+            m_UnblockAtSpeed,
+            new GUIContent("Unblock At Speed",
+            "Should the hidden agent switch from obstacle to agent if it surpasses the UnblockSpeedTreshold?")
+            );
+        if (EditorGUI.EndChangeCheck())
+        {
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Unblock At Speed");
+                agent.UnblockAtSpeed = m_UnblockAtSpeed.boolValue;
+            }
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        GUI.enabled = m_UnblockAtSpeed.boolValue;
+        EditorGUI.indentLevel++;
+
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(
+            m_UnblockSpeedThreshold,
+            new GUIContent("Unblock Speed Threshold",
+            "Speed at which the hidden agent turns into an agent again " +
+            "if it is currently in obstacle mode.")
+            );
+        if (EditorGUI.EndChangeCheck())
+        {
+            if (m_UnblockSpeedThreshold.floatValue < 0.0f) m_UnblockSpeedThreshold.floatValue = 0.0f;
+
+            foreach (var agent in Agents)
+            {
+                Undo.RecordObject(agent, "Changed Agent Unblock Speed Threshold");
+                agent.UnblockSpeedThreshold = m_UnblockSpeedThreshold.floatValue;
+            }
+
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        GUI.enabled = guiEnabled;
+        EditorGUI.indentLevel--;
 
         EditorGUI.indentLevel--;
 
@@ -487,12 +594,12 @@ public class CustomNavMeshAgentInspector : Editor
     private void AgentTypePopupInternal(string labelName, SerializedProperty agentTypeID)
     {
         var index = -1;
-        var count = UnityEngine.AI.NavMesh.GetSettingsCount();
+        var count = NavMesh.GetSettingsCount();
         var agentTypeNames = new string[count + 2];
         for (var i = 0; i < count; i++)
         {
-            var id = UnityEngine.AI.NavMesh.GetSettingsByIndex(i).agentTypeID;
-            var name = UnityEngine.AI.NavMesh.GetSettingsNameFromID(id);
+            var id = NavMesh.GetSettingsByIndex(i).agentTypeID;
+            var name = NavMesh.GetSettingsNameFromID(id);
             agentTypeNames[i] = name;
             if (id == agentTypeID.intValue)
                 index = i;
@@ -515,7 +622,7 @@ public class CustomNavMeshAgentInspector : Editor
         {
             if (index >= 0 && index < count)
             {
-                var id = UnityEngine.AI.NavMesh.GetSettingsByIndex(index).agentTypeID;
+                var id = NavMesh.GetSettingsByIndex(index).agentTypeID;
                 agentTypeID.intValue = id;
             }
             else if (index == count + 1)

@@ -26,7 +26,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     Vector3 lastPosition;
 
     Vector3? destination;
-    float timer; // count the time since agent changed mode or block mode is refreshed
+    float timer; // count the time since the agent changed mode or since that mode was refreshed
 
     /// <summary>
     /// Access the current velocity of the hidden agent component. Returns Vector3.zero 
@@ -115,6 +115,9 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         {
             if (Application.isPlaying)
             {
+                // Reset timer when changing the blocking state
+                if (value != IsBlocking) timer = 0f;
+
                 if (value)
                 {
                     SwitchToObstacle();
@@ -262,33 +265,41 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 
         float currentSpeed = Vector3.Distance(transform.position, lastPosition) / Time.deltaTime;
 
-        if(currentSpeed < CustomAgent.UnblockSpeedThreshold) // if it did not surpass the speed threshold
+        if(IsBlocking)
         {
-            timer += Time.deltaTime;
-
-            if(IsBlocking)
+            if(CustomAgent.UnblockAtSpeed && currentSpeed > CustomAgent.UnblockSpeedThreshold)
             {
-                if (timer >= CustomAgent.BlockRefreshInterval)
+                IsBlocking = false;
+            }
+            else if(CustomAgent.UnblockAfterDuration)
+            {
+                if(timer >= CustomAgent.TimeToUnblock)
                 {
                     timer = 0.0f;
                     TryUnblock();
                 }
+                else
+                {
+                    timer += Time.deltaTime;
+                }
             }
-            else
+        }
+        else // is not blocking
+        {
+            if(CustomAgent.BlockAfterDuration)
             {
                 if (timer >= CustomAgent.TimeToBlock)
                 {
                     IsBlocking = true;
                 }
-            }
-        }
-        else
-        {
-            timer = 0.0f;
-
-            if (IsBlocking)
-            {
-                IsBlocking = false;
+                else if (currentSpeed > CustomAgent.BlockSpeedThreshold)
+                {
+                    timer = 0.0f;
+                }
+                else
+                {
+                    timer += Time.deltaTime;
+                }
             }
         }
 
@@ -346,7 +357,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
                     {
                         // Check if last calculated path position is closer, so the agent can leave block mode
                         Vector3 lastPathPos = path.corners[path.corners.Length - 1];
-                        if (Vector3.Distance(lastPathPos, destination.Value) + CustomAgent.MinDistanceBoostToStopBlock < Vector3.Distance(agentSurfacePos, destination.Value))
+                        if (Vector3.Distance(lastPathPos, destination.Value) + CustomAgent.DistanceReductionThreshold < Vector3.Distance(agentSurfacePos, destination.Value))
                         {
                             SwitchToAgent();
                             Agent.SetPath(path);

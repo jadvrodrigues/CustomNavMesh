@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.AI;
@@ -238,15 +237,81 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { NavMeshAgent.updateRotation = value; }
     }
 
+    [SerializeField] bool m_BlockAfterDuration = true;
+    /// <summary>
+    /// Should the hidden agent switch from agent to obstacle if it hasn't surpassed 
+    /// the BlockSpeedTreshold for TimeToBlock seconds?
+    /// </summary>
+    public bool BlockAfterDuration
+    {
+        get { return m_BlockAfterDuration; }
+        set { m_BlockAfterDuration = value; }
+    }
+
     [SerializeField] float m_TimeToBlock = 1.0f;
     /// <summary>
     /// Time in seconds needed for the hidden agent to switch from agent to obstacle, 
-    /// assuming it hasn't surpassed the UnblockSpeedTreshold during the interval.
+    /// assuming it hasn't surpassed the BlockSpeedTreshold during the interval.
     /// </summary>
     public float TimeToBlock
     {
         get { return m_TimeToBlock; }
         set { m_TimeToBlock = value; }
+    }
+
+    [SerializeField] float m_BlockSpeedThreshold = 1.0f;
+    /// <summary>
+    /// Speed the agent can't surpass for TimeToBlock seconds for the hidden agent 
+    /// to turn into an obstacle.
+    /// </summary>
+    public float BlockSpeedThreshold
+    {
+        get { return m_BlockSpeedThreshold; }
+        set { m_BlockSpeedThreshold = value; }
+    }
+
+    [SerializeField] bool m_UnblockAfterDuration = true;
+    /// <summary>
+    /// Should the hidden agent try to find a new path every TimeToUnblock seconds, and switch from obstacle to agent 
+    /// when it finds a path which reduces its distance to the destination by DistanceReductionThreshold?
+    /// </summary>
+    public bool UnblockAfterDuration
+    {
+        get { return m_UnblockAfterDuration; }
+        set { m_UnblockAfterDuration = value; }
+    }
+
+    [SerializeField] float m_TimeToUnblock = 1.0f;
+    /// <summary>
+    /// Time in seconds needed for the hidden agent to check if it should change to agent again, 
+    /// assuming it is currently in obstacle mode.
+    /// </summary>
+    public float TimeToUnblock
+    {
+        get { return m_TimeToUnblock; }
+        set { m_TimeToUnblock = value; }
+    }
+
+    [SerializeField] float m_DistanceReductionThreshold = 0.5f;
+    /// <summary>
+    /// When the agent checks if it should stop blocking, this is the minimum distance the newly calculated reacheable position 
+    /// must be closer to the destination (comparing with the current position) for it to change into an agent again.
+    /// </summary>
+    public float DistanceReductionThreshold
+    {
+        get { return m_DistanceReductionThreshold; }
+        set { m_DistanceReductionThreshold = value; }
+    }
+
+    [SerializeField] bool m_UnblockAtSpeed = true;
+    /// <summary>
+    /// Should the hidden agent switch from obstacle to agent if it surpasses 
+    /// the UnblockSpeedTreshold?
+    /// </summary>
+    public bool UnblockAtSpeed
+    {
+        get { return m_UnblockAtSpeed; }
+        set { m_UnblockAtSpeed = value; }
     }
 
     [SerializeField] float m_UnblockSpeedThreshold = 1.0f;
@@ -260,38 +325,15 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_UnblockSpeedThreshold = value; }
     }
 
-    [SerializeField] float m_BlockRefreshInterval = 1.0f;
-    /// <summary>
-    /// Time in seconds needed for the hidden agent to check if it should change to agent again, 
-    /// assuming it is currently in obstacle mode.
-    /// </summary>
-    public float BlockRefreshInterval
-    {
-        get { return m_BlockRefreshInterval; }
-        set { m_BlockRefreshInterval = value; }
-    }
-
-    [SerializeField] float m_MinDistanceBoostToStopBlock = 0.5f;
-    /// <summary>
-    /// In the block refresh (when "blocking" obstacle agent checks if it should change to a moving agent),
-    /// this is the minimum distance the newly calculated reacheable position must be closer to the 
-    /// destination (comparing with the current position) so it can change to agent.
-    /// </summary>
-    public float MinDistanceBoostToStopBlock
-    {
-        get { return m_MinDistanceBoostToStopBlock; }
-        set { m_MinDistanceBoostToStopBlock = value; }
-    }
-
-    [SerializeField] float m_MoveThreshold = 0.1f;
+    [SerializeField] float m_CarvingMoveThreshold = 0.1f;
     /// <summary>
     /// This refers to the hidden agent's obstacle when blocking. Threshold distance 
     /// for updating a moving carved hole.
     /// </summary>
     public float CarvingMoveThreshold
     {
-        get { return m_MoveThreshold; }
-        set { m_MoveThreshold = value; onChange?.Invoke(); }
+        get { return m_CarvingMoveThreshold; }
+        set { m_CarvingMoveThreshold = value; onChange?.Invoke(); }
     }
 
     [SerializeField] float m_TimeToStationary = 0.5f;

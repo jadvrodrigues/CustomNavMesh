@@ -44,12 +44,10 @@ NavMeshAgent vs NavMeshObstacle "Agents"            |  CustomNavMeshAgents
 
 - **CustomNavMeshSurface** – add to each surface that is going to be baked. These **surfaces** need to be **rendered meshes**. Both **Physics Colliders** and **Terrains** are ignored by it;
 - **CustomNavMeshObstacle** – replacement for **NavMeshObstacle**;
-- **CustomNavMeshAgent** – replacement for **NavMeshAgent**. It has some added properties:
-  - **Time to Block** – time in **seconds needed** for the agent to **start blocking** (to make others go around it), assuming it hasn't surpassed the Unblock Speed Threshold during the interval;
-  - **Unblock Speed Threshold** – the **speed at** which the agent **stops blocking** and moves instead;
-  - **Block Refresh Interval** – time in **seconds needed** for the agent to **check** if it should **stop blocking**;
-  - **Min Distance Boost to Stop Block** - When block is **refreshed**, this is the **minimum distance** the newly calculated reachable position must be **closer** from the target — **compared to its current distance** from the target — for it to **stop blocking**;
-  - **The rest** have to do with the blocking obstacle carving and are identical to the **NavMeshObstacle carving settings**.
+- **CustomNavMeshAgent** – replacement for **NavMeshAgent**. The main extra properties are:
+  - **Block after Duration** – should the hidden agent start blocking (switch from agent to obstacle) if it hasn't surpassed a certain speed for a given time?
+  - **Unblock after Duration** - should the hidden agent periodically try to find a new shorter path and unblock (switch from obstacle to agent) when it finds one?
+  - **Unblock at Speed** - should the hidden agent unblock if it surpasses a certain speed?
 
 ## How To Get Started
 
