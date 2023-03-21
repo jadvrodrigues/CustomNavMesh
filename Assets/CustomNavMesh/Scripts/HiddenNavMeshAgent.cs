@@ -42,6 +42,18 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Access the current destination of the hidden agent component. 
+    /// Returns transform.position if it is disabled. 
+    /// </summary>
+    public Vector3 Destination => Agent.enabled ? Agent.destination : transform.position;
+
+    /// <summary>
+    /// Access the current path of the hidden agent component. 
+    /// Returns null if it is disabled. 
+    /// </summary>
+    public NavMeshPath Path => Agent.enabled ? Agent.path : null;
+
     bool isBlocking;
     public bool IsBlocking
     {

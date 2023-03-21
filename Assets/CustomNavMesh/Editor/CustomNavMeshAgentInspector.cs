@@ -354,8 +354,6 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUILayout.Space();
         EditorGUILayout.LabelField(s_Styles.m_AgentPathBlockingHeader, EditorStyles.boldLabel);
 
-        EditorGUI.indentLevel++;
-
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(
             m_BlockAfterDuration,
@@ -470,12 +468,8 @@ public class CustomNavMeshAgentInspector : Editor
 
         EditorGUI.indentLevel--;
 
-        EditorGUI.indentLevel--;
-
         EditorGUILayout.Space();
         EditorGUILayout.LabelField(s_Styles.m_AgentPathUnblockingHeader, EditorStyles.boldLabel);
-
-        EditorGUI.indentLevel++;
 
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(
@@ -584,8 +578,6 @@ public class CustomNavMeshAgentInspector : Editor
         }
 
         GUI.enabled = guiEnabled;
-        EditorGUI.indentLevel--;
-
         EditorGUI.indentLevel--;
 
         serializedObject.ApplyModifiedProperties();

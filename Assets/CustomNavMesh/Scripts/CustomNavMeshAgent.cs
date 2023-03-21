@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System.Linq;
+using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.AI;
@@ -132,12 +133,6 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_Speed = value; NavMeshAgent.speed = value; onChange?.Invoke(); }
     }
 
-    public Vector3 Velocity
-    {
-        get { return HiddenAgent ? HiddenAgent.Velocity : Vector3.zero; }
-        set { if (HiddenAgent) HiddenAgent.Velocity = value; }
-    }
-
     /// <summary>
     /// Is the hidden agent an obstacle instead of an agent?
     /// </summary>
@@ -145,6 +140,35 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     {
         get { return HiddenAgent ? HiddenAgent.IsBlocking : false; }
         set { if (HiddenAgent) HiddenAgent.IsBlocking = value; }
+    }
+
+    /// <summary>
+    /// Should this agent follow the hidden agent's movement at every frame?
+    /// </summary>
+    public bool FollowHiddenAgent { get; set; } = true;
+
+    /// <summary>
+    /// Gets the destination of the agent in world-space units.
+    /// </summary>
+    public Vector3 Destination
+    {
+        get => HiddenAgent ? HiddenAgent.Destination - CustomNavMesh.HiddenTranslation : transform.position;
+    }
+
+    /// <summary>
+    /// Property to set the current path.
+    /// </summary>
+    public Vector3[] PathCorners
+    {
+        get
+        {
+            if (HiddenAgent)
+            {
+                NavMeshPath hiddenPath = HiddenAgent.Path;
+                if(hiddenPath != null) return hiddenPath.corners.Select(corner => corner - CustomNavMesh.HiddenTranslation).ToArray();
+            }
+            return new Vector3[1] { transform.position };
+        }
     }
 
     [SerializeField] float m_Acceleration = 8.0f;
@@ -537,10 +561,12 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
 #if UNITY_EDITOR
         if (!Application.isPlaying) return;
 #endif
-        if (HiddenAgent && Time.deltaTime != 0)
+        if (FollowHiddenAgent && HiddenAgent && Time.deltaTime != 0)
         {
+            // Occasionally, when agents block/unblock the hidden agent velocity's magnitude surpasses
+            // the speed during a single frame, so just clamp it
             Vector3 desiredVelocity = Vector3.ClampMagnitude(HiddenAgent.Velocity, Speed);
-            NavMeshAgent.Move(desiredVelocity * Time.deltaTime);
+            NavMeshAgent.Move(HiddenAgent.Velocity * Time.deltaTime);
         }
     }
 
