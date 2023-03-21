@@ -138,6 +138,15 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { if (HiddenAgent) HiddenAgent.Velocity = value; }
     }
 
+    /// <summary>
+    /// Is the hidden agent an obstacle instead of an agent?
+    /// </summary>
+    public bool IsHiddenAgentBlocking
+    {
+        get { return HiddenAgent ? HiddenAgent.IsBlocking : false; }
+        set { if (HiddenAgent) HiddenAgent.IsBlocking = value; }
+    }
+
     [SerializeField] float m_Acceleration = 8.0f;
     /// <summary>
     /// The maximum acceleration of an agent as it follows a path, given in units / sec^2.
@@ -357,7 +366,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         get { return m_CarveOnlyStationary; }
         set { m_CarveOnlyStationary = value; onChange?.Invoke(); }
     }
-
+   
     // Why serialize the game object? Because the HiddenNavMeshAgent would reset to null.
     [SerializeField, HideInInspector] GameObject hiddenAgentGameObject;
     HiddenNavMeshAgent hiddenAgent;

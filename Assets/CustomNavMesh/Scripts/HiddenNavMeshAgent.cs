@@ -42,6 +42,34 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         }
     }
 
+    bool isBlocking;
+    public bool IsBlocking
+    {
+        get { return isBlocking; }
+        set
+        {
+            if (Application.isPlaying)
+            {
+                // Reset timer when changing the blocking state
+                if (value != IsBlocking) timer = 0f;
+
+                if (value)
+                {
+                    SwitchToObstacle();
+                }
+                else
+                {
+                    SwitchToAgent();
+
+                    if (destination.HasValue)
+                    {
+                        agent.SetDestination(destination.Value);
+                    }
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// The distance between the agent's position and the destination on the current path.
     /// If the remaining distance is unknown or the hidden agent component is disabled 
@@ -104,34 +132,6 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
                 }
             }
             return obstacle;
-        }
-    }
-
-    bool isBlocking;
-    bool IsBlocking
-    {
-        get { return isBlocking; }
-        set
-        {
-            if (Application.isPlaying)
-            {
-                // Reset timer when changing the blocking state
-                if (value != IsBlocking) timer = 0f;
-
-                if (value)
-                {
-                    SwitchToObstacle();
-                }
-                else
-                {
-                    SwitchToAgent();
-
-                    if (destination.HasValue)
-                    {
-                        agent.SetDestination(destination.Value);
-                    }
-                }
-            }
         }
     }
 
