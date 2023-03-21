@@ -1,9 +1,12 @@
 ﻿using System.Linq;
-using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.SceneManagement;
+
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEditor.SceneManagement;
+#endif
 
 /// <summary>
 /// Custom navigation mesh agent.
@@ -132,6 +135,11 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         get { return m_Speed; }
         set { m_Speed = value; NavMeshAgent.speed = value; onChange?.Invoke(); }
     }
+
+    /// <summary>
+    /// Access the current velocity of the CustomNavMeshAgent component, or set a velocity to control the agent manually.
+    /// </summary>
+    public Vector3 Velocity { get; set; }
 
     /// <summary>
     /// Is the hidden agent an obstacle instead of an agent?
@@ -561,13 +569,27 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
 #if UNITY_EDITOR
         if (!Application.isPlaying) return;
 #endif
-        if (FollowHiddenAgent && HiddenAgent && Time.deltaTime != 0)
+
+        if(Time.deltaTime > 0)
         {
-            // Occasionally, when agents block/unblock the hidden agent velocity's magnitude surpasses
-            // the speed during a single frame, so just clamp it
-            Vector3 desiredVelocity = Vector3.ClampMagnitude(HiddenAgent.Velocity, Speed);
-            NavMeshAgent.Move(HiddenAgent.Velocity * Time.deltaTime);
+            // Find the desired velocity
+            Vector3 desiredVelocity = Vector3.zero;
+            if (FollowHiddenAgent && HiddenAgent)
+            {
+                // Occasionally, when agents block/unblock the hidden agent velocity's
+                // magnitude surpasses the speed during a single frame, so clamp it
+                desiredVelocity = Vector3.ClampMagnitude(HiddenAgent.Velocity, Speed);
+            }
+
+            // Update the velocity
+            Vector3 acceleration = (desiredVelocity - Velocity) / Time.deltaTime;
+            acceleration = Vector3.ClampMagnitude(acceleration, Acceleration);
+            Velocity += acceleration * Time.deltaTime;
+
+            // Apply the velocity
+            if (Velocity != Vector3.zero) NavMeshAgent.Move(Velocity * Time.deltaTime);
         }
+        
     }
 
     protected override void OnCustomEnable()
@@ -581,6 +603,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
 
         savedParent = transform.parent;
 
+#if UNITY_EDITOR
         // When leaving the prefab isolation mode, the agent should be disabled and
         // enabled so that the hidden agent can be spawned in the scene
         PrefabStage.prefabStageClosing -= OnPrefabStageClosing;
@@ -595,6 +618,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
                 sceneObject.SetActive(true);
             }
         }
+#endif
     }
 
     protected override void OnCustomDisable()
@@ -621,8 +645,10 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
 
     void TryCreatingHiddenAgent()
     {
+#if UNITY_EDITOR
         // do not create the hidden agent in prefab mode
         if (PrefabStageUtility.GetCurrentPrefabStage() != null) return;
+#endif
 
         if (HiddenAgent == null || !HiddenAgent.IsLinkedWith(this))
         {

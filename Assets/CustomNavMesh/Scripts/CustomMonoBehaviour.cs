@@ -1,10 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-#if UNITY_EDITOR
-
-#endif
-
 /// <summary>
 /// Monobehaviour replacement class used to simplify some UnityMessages and 
 /// turn them into uniquely identifiable methods. Hiding the protected 
