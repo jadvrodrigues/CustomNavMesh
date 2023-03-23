@@ -604,18 +604,21 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         savedParent = transform.parent;
 
 #if UNITY_EDITOR
-        // When leaving the prefab isolation mode, the agent should be disabled and
-        // enabled so that the hidden agent can be spawned in the scene
+        // When leaving the prefab mode, all active agents in the current scene should be
+        // disabled and enabled so that the hidden agents can be spawned in the scene
         PrefabStage.prefabStageClosing -= OnPrefabStageClosing;
         PrefabStage.prefabStageClosing += OnPrefabStageClosing;
 
         void OnPrefabStageClosing(PrefabStage prefabStage)
         {
-            GameObject sceneObject = prefabStage.openedFromInstanceObject;
-            if (sceneObject != null)
+            foreach(var activeSceneObjects in FindObjectsOfType(typeof(CustomNavMeshAgent)))
             {
-                sceneObject.SetActive(false);
-                sceneObject.SetActive(true);
+                CustomNavMeshAgent agent = activeSceneObjects as CustomNavMeshAgent;
+                if(agent.enabled)
+                {
+                    agent.enabled = false;
+                    agent.enabled = true;
+                }
             }
         }
 #endif
