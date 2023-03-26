@@ -48,8 +48,8 @@ public class CustomNavMeshAgentInspector : Editor
         public readonly GUIContent m_AgentSteeringHeader = EditorGUIUtility.TrTextContent("Steering");
         public readonly GUIContent m_AgentAvoidanceHeader = EditorGUIUtility.TrTextContent("Obstacle Avoidance");
         public readonly GUIContent m_AgentPathFindingHeader = EditorGUIUtility.TrTextContent("Path Finding");
-        public readonly GUIContent m_AgentPathBlockingHeader = EditorGUIUtility.TrTextContent("Blocking");
-        public readonly GUIContent m_AgentPathUnblockingHeader = EditorGUIUtility.TrTextContent("Unblocking");
+        public readonly GUIContent m_AgentBlockingHeader = EditorGUIUtility.TrTextContent("Blocking");
+        public readonly GUIContent m_AgentUnblockingHeader = EditorGUIUtility.TrTextContent("Unblocking");
     }
 
     static Styles s_Styles;
@@ -352,7 +352,7 @@ public class CustomNavMeshAgentInspector : Editor
         }
 
         EditorGUILayout.Space();
-        EditorGUILayout.LabelField(s_Styles.m_AgentPathBlockingHeader, EditorStyles.boldLabel);
+        EditorGUILayout.LabelField(s_Styles.m_AgentBlockingHeader, EditorStyles.boldLabel);
 
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(
@@ -424,7 +424,11 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUI.indentLevel++;
 
         EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(m_CarvingMoveThreshold);
+        EditorGUILayout.PropertyField(m_CarvingMoveThreshold,
+            new GUIContent("Carving Move Threshold",
+            "This refers to the hidden agent's obstacle when blocking. " +
+            "Threshold distance for updating a moving carved hole.")
+            );
         if (EditorGUI.EndChangeCheck())
         {
             if (m_CarvingMoveThreshold.floatValue < 0.0f) m_CarvingMoveThreshold.floatValue = 0.0f;
@@ -439,7 +443,11 @@ public class CustomNavMeshAgentInspector : Editor
         }
 
         EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(m_TimeToStationary);
+        EditorGUILayout.PropertyField(m_TimeToStationary,
+            new GUIContent("Time To Stationary",
+            "This refers to the hidden agent's obstacle when blocking. " +
+            "Time to wait until the obstacle is treated as stationary (when CarveOnlyStationary is enabled).")
+            );
         if (EditorGUI.EndChangeCheck())
         {
             if (m_TimeToStationary.floatValue < 0.0f) m_TimeToStationary.floatValue = 0.0f;
@@ -454,7 +462,11 @@ public class CustomNavMeshAgentInspector : Editor
         }
 
         EditorGUI.BeginChangeCheck();
-        EditorGUILayout.PropertyField(m_CarveOnlyStationary);
+        EditorGUILayout.PropertyField(m_CarveOnlyStationary,
+            new GUIContent("Carve Only Stationary",
+            "This refers to the hidden agent's obstacle when blocking. " +
+            "Should the obstacle be carved when it is constantly moving?")
+            );
         if (EditorGUI.EndChangeCheck())
         {
             foreach (var agent in Agents)
@@ -469,7 +481,7 @@ public class CustomNavMeshAgentInspector : Editor
         EditorGUI.indentLevel--;
 
         EditorGUILayout.Space();
-        EditorGUILayout.LabelField(s_Styles.m_AgentPathUnblockingHeader, EditorStyles.boldLabel);
+        EditorGUILayout.LabelField(s_Styles.m_AgentUnblockingHeader, EditorStyles.boldLabel);
 
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(

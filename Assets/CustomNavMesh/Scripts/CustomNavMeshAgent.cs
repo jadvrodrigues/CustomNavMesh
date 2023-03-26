@@ -269,13 +269,25 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_AvoidancePriority = value; NavMeshAgent.avoidancePriority = value; onChange?.Invoke(); }
     }
 
+    [SerializeField] bool m_UpdateRotation = true;
     /// <summary>
     /// Should the agent update the transform orientation?
     /// </summary>
     public bool UpdateRotation
     {
-        get { return NavMeshAgent.updateRotation; }
-        set { NavMeshAgent.updateRotation = value; }
+        get { return m_UpdateRotation; }
+        set { m_UpdateRotation = value; }
+    }
+
+    [SerializeField] bool m_DuplicateAgent = true;
+    /// <summary>
+    /// If enabled, this game object will be a navigation agent (have its NavMeshAgent component enabled) at runtime.
+    /// If disabled, only the hidden agent will be a part of the navigation system (as an agent/obstacle).
+    /// </summary>
+    public bool DuplicateAgent
+    {
+        get { return m_DuplicateAgent; }
+        set { m_DuplicateAgent = value; NavMeshAgent.enabled = value; }
     }
 
     [SerializeField] bool m_BlockAfterDuration = true;
@@ -388,7 +400,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         set { m_TimeToStationary = value; onChange?.Invoke(); }
     }
 
-    [SerializeField] bool m_CarveOnlyStationary = true;
+    [SerializeField] bool m_CarveOnlyStationary = false;
     /// <summary>
     /// This refers to the hidden agent's obstacle when blocking. Should the obstacle be carved 
     /// when it is constantly moving?
@@ -449,6 +461,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     public void Move(Vector3 offset)
     {
         if (NavMeshAgent.enabled) NavMeshAgent.Move(offset);
+        else transform.Translate(offset, Space.World);
 
         // update hidden position now (instead of waiting for the next frame)
         // so the agent's path can get recalculated sooner
@@ -587,9 +600,20 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
             Velocity += acceleration * Time.deltaTime;
 
             // Apply the velocity
-            if (Velocity != Vector3.zero) NavMeshAgent.Move(Velocity * Time.deltaTime);
+            if (Velocity != Vector3.zero)
+            {
+                // Move
+                if (NavMeshAgent.enabled) NavMeshAgent.Move(Velocity * Time.deltaTime);
+                else transform.Translate(Velocity * Time.deltaTime, Space.World);
+
+                // Rotate
+                if(m_UpdateRotation)
+                {
+                    float maxRadiansDelta = AngularSpeed * Time.deltaTime * Mathf.Deg2Rad;
+                    transform.forward = Vector3.RotateTowards(transform.forward, Velocity, maxRadiansDelta, 0f);
+                }
+            }
         }
-        
     }
 
     protected override void OnCustomEnable()
@@ -597,7 +621,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         // calling the NavMeshObstacle property will add an obstacle if gameObject doesn't have it
         // the custom inspector will only hide after a split second so update the flags now 
         NavMeshAgent.hideFlags = HideFlags.HideInInspector;
-        NavMeshAgent.enabled = true;
+        NavMeshAgent.enabled = Application.isPlaying ? DuplicateAgent : true;
         
         TryCreatingHiddenAgent();
 
