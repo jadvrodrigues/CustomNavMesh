@@ -43,6 +43,11 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     }
 
     /// <summary>
+    /// The desired velocity of the agent including any potential contribution from avoidance. (Read Only)
+    /// </summary>
+    public Vector3 DesiredVelocity => Agent.enabled ? Agent.desiredVelocity : Vector3.zero;
+
+    /// <summary>
     /// Access the current destination of the hidden agent component. 
     /// Returns transform.position if it is disabled. 
     /// </summary>

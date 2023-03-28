@@ -10,7 +10,7 @@ Unity's NavMeshAgent             |  CustomNavMeshAgent
 :-------------------------:|:-------------------------:
 ![](Assets/Examples/GIFs/1_before.gif)  |  ![](Assets/Examples/GIFs/1_after.gif)
 
-> **1. Setting the destination** to the blue target.
+> **1. Setting the destination** to the blue target's **exact** center position.
 
 **What if a moving agent collides against a stopped agent that's currently in obstacle mode**? By default, it wouldn't be able to push it. However, by:
 

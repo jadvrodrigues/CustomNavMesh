@@ -164,6 +164,14 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     }
 
     /// <summary>
+    /// The desired velocity of the agent including any potential contribution from avoidance. (Read Only)
+    /// </summary>
+    public Vector3 DesiredVelocity
+    {
+        get => HiddenAgent ? HiddenAgent.DesiredVelocity : Vector3.zero;
+    }
+
+    /// <summary>
     /// Property to set the current path.
     /// </summary>
     public Vector3[] PathCorners
