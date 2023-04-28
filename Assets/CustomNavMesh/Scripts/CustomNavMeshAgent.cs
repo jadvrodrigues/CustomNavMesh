@@ -187,6 +187,11 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Does the agent currently have a path? (Read Only)
+    /// </summary>
+    public bool HasPath => HiddenAgent ? HiddenAgent.HasPath : false;
+
     [SerializeField] float m_Acceleration = 8.0f;
     /// <summary>
     /// The maximum acceleration of an agent as it follows a path, given in units / sec^2.
