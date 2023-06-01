@@ -252,7 +252,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         Agent.enabled = false;
     }
 
-    protected override void OnCustomDisable()
+    protected override void OnCustomDestroy()
     {
         TryUnsubscribe();
     }

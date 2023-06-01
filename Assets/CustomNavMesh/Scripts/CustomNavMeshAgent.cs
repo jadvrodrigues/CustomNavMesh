@@ -665,7 +665,7 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
     {
         NavMeshAgent.enabled = false;
 
-        TryDestroyingHiddenAgent();
+        TryDisablingHiddenAgent();
     }
 
     protected override void OnCustomDestroy()
@@ -710,6 +710,18 @@ public class CustomNavMeshAgent : CustomMonoBehaviour
             EditorUtility.SetDirty(this);
 #endif
             HiddenAgent.LinkWithCustomAgent(this);
+        }
+        else if(!HiddenAgent.gameObject.activeSelf)
+        {
+            HiddenAgent.gameObject.SetActive(true);
+        }
+    }
+
+    void TryDisablingHiddenAgent()
+    {
+        if (HiddenAgent != null)
+        {
+            HiddenAgent.gameObject.SetActive(false);
         }
     }
 
