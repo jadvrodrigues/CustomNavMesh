@@ -55,7 +55,7 @@ NavMeshAgent vs NavMeshObstacle "Agents"            |  CustomNavMeshAgents
 
 The **scenes** used for the **GIFs** are available in the `Assets/Examples` folder. Just hit the **Space Bar** in play mode to test it.
 
-Note: This project is using the **Unity 2021.3 LTS** version. Tested in **PC Standalone**, **Android**, and **WebGL**.
+Note: This project is using the **Unity 2022.3 LTS** version. Tested in **PC Standalone**, **Android**, and **WebGL**.
 
 ## Final thoughts
 
