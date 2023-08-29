@@ -85,7 +85,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 
                     if (destination.HasValue)
                     {
-                        agent.SetDestination(destination.Value);
+                        Agent.SetDestination(destination.Value);
                     }
                 }
             }
@@ -121,8 +121,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         {
             if (agent == null)
             {
-                agent = GetComponent<NavMeshAgent>();
-                if (agent == null)
+                if (!TryGetComponent(out agent))
                 {
                     agent = gameObject.AddComponent<NavMeshAgent>();
                 }
@@ -142,8 +141,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         {
             if (obstacle == null)
             {
-                obstacle = GetComponent<NavMeshObstacle>();
-                if (obstacle == null)
+                if (!TryGetComponent(out obstacle))
                 {
                     obstacle = gameObject.AddComponent<NavMeshObstacle>();
                 }
@@ -175,7 +173,7 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
         SwitchToAgent();
 
         destination = target;
-        return agent.SetDestination(target);
+        return Agent.SetDestination(target);
     }
 
     /// <summary>
@@ -226,21 +224,18 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
 
     protected override void OnCustomEnable()
     {
-        var meshFilter = GetComponent<MeshFilter>();
-        if (meshFilter == null)
+        if (GetComponent<MeshFilter>() == null)
         {
             gameObject.AddComponent<MeshFilter>();
         }
 
-        var meshRenderer = GetComponent<MeshRenderer>();
-        if (meshRenderer == null)
+        if (GetComponent<MeshRenderer>() == null)
         {
-            meshRenderer = gameObject.AddComponent<MeshRenderer>();
+            var meshRenderer = gameObject.AddComponent<MeshRenderer>();
             meshRenderer.sharedMaterial = CustomNavMesh.HiddenAgentMaterial;
         }
 
-        obstacle = GetComponent<NavMeshObstacle>();
-        if (obstacle == null)
+        if (!TryGetComponent(out obstacle))
         {
             obstacle = gameObject.AddComponent<NavMeshObstacle>();
             obstacle.carving = true;
@@ -332,8 +327,8 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     {
         isBlocking = false;
 
-        obstacle.enabled = false;
-        agent.enabled = true;
+        Obstacle.enabled = false;
+        Agent.enabled = true;
 
         timer = 0.0f;
         GetComponent<MeshRenderer>().sharedMaterial = CustomNavMesh.HiddenAgentMaterial;
@@ -343,8 +338,8 @@ public class HiddenNavMeshAgent : CustomMonoBehaviour
     {
         isBlocking = true;
 
-        agent.enabled = false;
-        obstacle.enabled = true;
+        Agent.enabled = false;
+        Obstacle.enabled = true;
 
         timer = 0.0f;
         GetComponent<MeshRenderer>().sharedMaterial = CustomNavMesh.HiddenBlockingAgentMaterial;
